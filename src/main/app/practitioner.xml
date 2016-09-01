@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
+	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.8.1"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd 
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+
+<flow name="post:/Practitioner:application/json:api-config">
+        <dw:transform-message doc:name="Prepare Create Practitioner request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://example.com/practitioner-service
+---
+{
+	ns0#CreatePractitioner: {
+		id: payload.id,
+		familyName: payload.name[0].family[0],
+		givenName: payload.name[0].given[0],
+		nameSuffix: payload.name[0].suffix[0],
+		email: (payload.telecom filter $.system == "email")[0].value when payload.telecom != null otherwise "",
+		emailUse: (payload.telecom filter $.system == "email")[0].use when payload.telecom != null otherwise "",
+		fax: (payload.telecom filter $.system == "fax")[0].value when payload.telecom != null otherwise "",
+		faxUse: (payload.telecom filter $.system == "fax")[0].use when payload.telecom != null otherwise "",
+		gender: payload.gender,
+		birthDate: payload.birthDate,
+		workAddressCity: payload.address[0].city,
+		workAddressCountry: payload.address[0].country,
+		workAddressLine: payload.address[0].line[0],
+		workAddressPostalCode: payload.address[0].postalCode,
+		workAddressState: payload.address[0].state,
+		phoneUse: payload.telecom[0].use when (payload.telecom is :array and payload.telecom[0] != null)  otherwise "",
+		phoneNumber: payload.telecom[0].value when  (payload.telecom is :array and payload.telecom[0] != null) otherwise "",
+		careProviderReference: payload.careProvider[0].reference default ""
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Practitioner" operation="CreatePractitioner" doc:name="CreatePractitioner"/>
+        <dw:transform-message doc:name="Set Location property and clear payload">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+null]]></dw:set-payload>
+            <dw:set-property propertyName="Location"><![CDATA[%dw 1.0
+%output application/java
+---
+p('baseUri') ++ 'Practitioner/' ++ payload.CreatePractitionerResponse.id]]></dw:set-property>
+        </dw:transform-message>
+    </flow>
+    <flow name="put:/Practitioner/{id}:application/json:api-config">
+        <dw:transform-message doc:name="Prepare Update Practitioner request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://example.com/practitioner-service
+---
+{
+	ns0#UpdatePractitioner: {
+		ns0#id: flowVars.id,
+		ns0#familyName: payload.name[0].family[0],
+		ns0#givenName: payload.name[0].given[0],
+		ns0#nameSuffix: payload.name[0].suffix[0],
+		ns0#email: (payload.telecom filter $.system == "email")[0].value when payload.telecom != null otherwise "",
+		ns0#emailUse: (payload.telecom filter $.system == "email")[0].use when payload.telecom != null otherwise "",
+		ns0#fax: (payload.telecom filter $.system == "fax")[0].value when payload.telecom != null otherwise "",
+		ns0#faxUse: (payload.telecom filter $.system == "fax")[0].use when payload.telecom != null otherwise "",
+		ns0#gender: payload.gender,
+		ns0#birthDate: payload.birthDate,
+		ns0#workAddressCity: payload.address[0].city,
+		ns0#workAddressCountry: payload.address[0].country,
+		ns0#workAddressLine: payload.address[0].line[0],
+		ns0#workAddressPostalCode: payload.address[0].postalCode,
+		ns0#workAddressState: payload.address[0].state,
+		ns0#phoneUse: payload.telecom[0].use when (payload.telecom is :array and payload.telecom[0] != null)  otherwise "",
+		ns0#phoneNumber: payload.telecom[0].value when  (payload.telecom is :array and payload.telecom[0] != null) otherwise "",
+		ns0#careProviderReference: payload.careProvider[0].reference default ""
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Practitioner" operation="UpdatePractitioner" doc:name="UpdatePractitioner"/>
+        <dw:transform-message doc:name="Set HTTP status">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+null ]]></dw:set-payload>
+            <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+%namespace ns0 http://mulesoft.org/practitioner-service
+---
+payload.UpdatePractitionerResponse.status]]></dw:set-property>
+        </dw:transform-message>
+    </flow>
+    <flow name="get:/Practitioner/{id}:application/json:api-config">
+        <dw:transform-message doc:name="Prepare Get Practitioner Request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://example.com/practitioner-service
+---
+{
+	ns0#GetPractitioner: {
+		id: flowVars.id
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Practitioner" operation="GetPractitioner" doc:name="Get Practitioner"/>
+        <dw:transform-message doc:name="Transform to FHIR Practitioner">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 http://example.com/practitioner-service
+---
+{
+	message: payload.Fault.errorMessage
+} when payload.Fault != null otherwise
+
+using (practitioner = payload.GetPractitionerResponse.Practitioner){
+	resourceType: "Practitioner",
+	id: practitioner.id,
+	address: [{
+		city: practitioner.workAddressCity,
+		country: practitioner.workAddressCountry,
+		line: [
+      		practitioner.workAddressLine
+    	],
+		postalCode: practitioner.workAddressPostalCode	
+	}],
+	birthDate: practitioner.birthDate,
+	gender: practitioner.gender,
+	name: [{
+		use: "official",
+		family: [practitioner.familyName],
+		given: [practitioner.givenName],
+		(prefix: [practitioner.title]) when practitioner.title != null,
+		(suffix: [practitioner.nameSuffix])  when practitioner.nameSuffix != null
+	}],
+	telecom: [
+		({
+			system: "phone",
+			use: practitioner.phoneUse,
+			value: practitioner.phoneNumber
+		}) when trim practitioner.phoneNumber != "",
+		({
+			system: "fax",
+			use: practitioner.faxUse,
+			value: practitioner.fax
+		}) when trim practitioner.fax != "",
+		({
+			system: "email",
+			use: practitioner.emailUse,
+			value: practitioner.email
+		}) when trim practitioner.email != ""
+	],
+	text: {
+		div: "",
+		status: "empty"
+	}
+}]]></dw:set-payload>
+            <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+---
+404 when payload.Fault != null otherwise 200]]></dw:set-property>
+        </dw:transform-message>
+    </flow>
+    <flow name="get:/Practitioner:application/json:api-config">
+        <dw:transform-message doc:name="Prepare request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://example.com/practitioner-service
+---
+{
+	ns0#GetPractitioners: {
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Practitioner" operation="GetPractitioners" doc:name="Get Practitioners"/>
+        <dw:transform-message doc:name="Transform to FHIR Bundle of Practitioners">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 http://example.com/practitioner-service
+---
+{
+	resourceType: "Bundle",
+	type: "searchset",
+	total: sizeOf payload.ns0#GetPractitionersResponse.*Practitioner 
+			when payload.ns0#GetPractitionersResponse is :object otherwise 0,
+	link: [{
+		relation: "self",
+		url: p('baseUri') ++ "Practitioner"
+	}],
+	(entry: payload.ns0#GetPractitionersResponse.*Practitioner map {
+		resourceType: "Practitioner",
+		id: $.id,
+		address: [{
+			city: $.workAddressCity,
+			country: $.workAddressCountry,
+			line: [
+	      		$.workAddressLine
+	    	],
+			postalCode: $.workAddressPostalCode	
+		}],
+		birthDate: $.birthDate,
+		gender: $.gender,
+		name: [{
+			use: "official",
+			family: [$.familyName],
+			given: [$.givenName],
+			(prefix: [$.title]) when $.title != null,
+			(suffix: [$.nameSuffix])  when $.nameSuffix != null
+		}],
+		telecom: [
+			({
+				system: "phone",
+				use: $.phoneUse,
+				value: $.phoneNumber
+			}) when trim $.phoneNumber != "",
+			({
+				system: "fax",
+				use: $.faxUse,
+				value: $.fax
+			}) when trim $.fax != "",
+			({
+				system: "email",
+				use: $.emailUse,
+				value: $.email
+			}) when trim $.email != ""
+		]
+	}) when payload.ns0#GetPractitionersResponse is :object
+}]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+
+
+</mule>

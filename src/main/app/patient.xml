@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
+	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+    <flow name="get:/Patient:api-config">
+        <dw:transform-message doc:name="Prepare Request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://example.com/patient-service
+---
+{
+	ns0#GetPatients: {
+	}
+}]]></dw:set-payload>
+            <dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0
+%output application/java
+---
+inboundProperties."http.request.uri"]]></dw:set-variable>
+        </dw:transform-message>
+        <ws:consumer config-ref="Patient" operation="GetPatients" doc:name="Get Patients"/>
+        <dw:transform-message doc:name="Transform to FHIR Bundle of Patients">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 http://example.com/patient-service
+---
+{
+	resourceType: "Bundle",
+	type: "searchset",
+	link: [{
+		relation: "self",
+		url: flowVars.requestURI
+	}],
+	total: sizeOf payload.ns0#GetPatientsResponse when payload.ns0#GetPatientsResponse is :object otherwise 0, 
+	(entry: payload.ns0#GetPatientsResponse.*Patient map 
+		{
+			resource: {
+				resourceType: "Patient",
+				id: $.id,
+				address: [{
+					city: $.address1City,
+					country: $.address1Country,
+					line: [
+			      $.address1Line1
+			    ],
+					postalCode: $.address1PostalCode,
+					(state: $.address1State) when $.address1State != null
+				}],
+				birthDate: $.birthDate,
+				careProvider: [{
+					reference: $.careProviderReference
+				}],
+				gender: $.gender,
+				(maritalStatus: {
+					coding: [{
+						code: $.maritalStatusCode,
+						system: $.maritalStatusSystem,
+						display: $.maritalStatusDisplay
+					}]
+				}) when $.maritalStatusDisplay != "",
+				name: [{
+					use: "official",
+					family: [$.familyName],
+					given: [$.givenName],
+					(prefix: [$.title]) when $.title != null,
+					(suffix: [$.nameSuffix])  when $.nameSuffix != null
+				}],
+				telecom: [{
+					system: "phone",
+					use: $.telecom1Use,
+					value: $.telecom1Value
+				}],
+				text: {
+					div: "",
+					status: "empty"
+				}
+			}
+		}) when payload.ns0#GetPatientsResponse is :object
+	
+}]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+    <flow name="get:/Patient/{id}:api-config">
+        <dw:transform-message doc:name="prepare Get Patient Request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://example.com/patient-service
+---
+{
+	ns0#GetPatient: {
+		id: flowVars.id
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Patient" operation="GetPatient" doc:name="Get Patient"/>
+        <dw:transform-message doc:name="Transform to FHIR Patient">
+            <dw:input-payload/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 http://example.com/patient-service
+---
+{
+	message: payload.Fault.errorMessage
+} when payload.Fault != null otherwise
+
+using (patient = payload.ns0#GetPatientResponse.Patient){
+	resourceType: "Patient",
+	id: patient.id,
+	address: [{
+		city: patient.address1City,
+		country: patient.address1Country,
+		line: [
+      patient.address1Line1
+    ],
+		postalCode: patient.address1PostalCode,
+		(state: patient.address1State) when patient.address1State != null
+	}],
+	birthDate: patient.birthDate,
+	careProvider: [{
+		reference: patient.careProviderReference
+	}],
+	gender: patient.gender,
+	(maritalStatus: {
+		coding: [{
+			code: patient.maritalStatusCode,
+			system: patient.maritalStatusSystem,
+			display: patient.maritalStatusDisplay
+		}]
+	}) when patient.maritalStatusDisplay != "",
+	name: [{
+		use: "official",
+		family: [patient.familyName],
+		given: [patient.givenName],
+		(prefix: [patient.title]) when patient.title != null,
+		(suffix: [patient.nameSuffix])  when patient.nameSuffix != null
+	}],
+	telecom: [{
+		system: "phone",
+		use: patient.telecom1Use,
+		value: patient.telecom1Value
+	}],
+	text: {
+		div: "",
+		status: "empty"
+	}
+}]]></dw:set-payload>
+            <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+---
+404 when payload.Fault != null otherwise 200]]></dw:set-property>
+        </dw:transform-message>
+    </flow>
+
+<flow name="post:/Patient:application/json:api-config">
+        <dw:transform-message doc:name="prepare Request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://example.com/patient-service
+---
+{
+	ns0#CreatePatient: {
+		familyName: payload.name[0].family[0],
+		givenName: payload.name[0].given[0],
+		gender: payload.gender,
+		birthDate: payload.birthDate,
+		maritalStatusCode: payload.maritalStatus.coding[0].code,
+		maritalStatusSystem: payload.maritalStatus.coding[0].system,
+		maritalStatusDisplay: payload.maritalStatus.coding[0].display,
+		address1City: payload.address[0].city,
+		address1Country: payload.address[0].country,
+		address1Line1: payload.address[0].line[0],
+		address1PostalCode: payload.address[0].postalCode,
+		address1State: payload.address[0].state,
+		telecom1Use: payload.telecom[0].use when (payload.telecom is :array and payload.telecom[0] != null)  otherwise "",
+		telecom1Value: payload.telecom[0].value when  (payload.telecom is :array and payload.telecom[0] != null) otherwise "",
+		telecom2Use: payload.telecom[1].use when (payload.telecom is :array and  payload.telecom[1] != null) otherwise "",
+		telecom2Value: payload.telecom[1].value when  (payload.telecom is :array and  payload.telecom[1] != null) otherwise "",
+		careProviderReference: payload.careProvider[0].reference default ""
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Patient" operation="CreatePatient" doc:name="Create Patient"/>
+        <dw:transform-message doc:name="Set Location property and clear payload">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+null]]></dw:set-payload>
+            <dw:set-property propertyName="Location"><![CDATA[%dw 1.0
+%output application/java
+---
+p('baseUri') ++ 'Patient/' ++ payload.CreatePatientResponse.id]]></dw:set-property>
+        </dw:transform-message>
+    </flow>
+    <flow name="put:/Patient/{id}:application/json:api-config">
+        <dw:transform-message doc:name="prepare Update Patient request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://example.com/patient-service
+---
+{
+	ns0#UpdatePatient: {
+		id: flowVars.id,
+		familyName: payload.name[0].family[0] default "",
+		givenName: payload.name[0].given[0] default "",
+		gender: payload.gender default "",
+		birthDate: payload.birthDate default "",
+		maritalStatusCode: payload.maritalStatus.coding[0].code default "",
+		maritalStatusSystem: payload.maritalStatus.coding[0].system default "",
+		maritalStatusDisplay: payload.maritalStatus.coding[0].display default "",
+		address1City: payload.address[0].city default "",
+		address1Country: payload.address[0].country default "",
+		address1Line1: payload.address[0].line[0] default "",
+		address1PostalCode: payload.address[0].postalCode default "",
+		address1State: payload.address[0].state default "",
+		telecom1Use: payload.telecom[0].use when (payload.telecom is :array and payload.telecom[0] != null)  otherwise "",
+		telecom1Value: payload.telecom[0].value when  (payload.telecom is :array and payload.telecom[0] != null) otherwise "",
+		telecom2Use: payload.telecom[1].use when (payload.telecom is :array and  payload.telecom[1] != null) otherwise "",
+		telecom2Value: payload.telecom[1].value when  (payload.telecom is :array and  payload.telecom[1] != null) otherwise "",
+		careProviderReference: payload.careProvider[0].reference default ""
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Patient" operation="UpdatePatient" doc:name="Update Patient"/>
+        <dw:transform-message doc:name="Set HTTP status">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+null]]></dw:set-payload>
+            <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+---
+payload.UpdatePatientResponse.status]]></dw:set-property>
+        </dw:transform-message>
+
+
+    </flow>
+    
+    
+    <flow name="get:/Patient/{id}/Condition:api-config">
+        <dw:transform-message doc:name="Prepare Request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://example.com/condition-service
+---
+{
+	ns0#GetConditions: {
+		patientID: flowVars.id
+	}
+}]]></dw:set-payload>
+            <dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0
+%output application/java
+---
+inboundProperties."http.request.uri"]]></dw:set-variable>
+        </dw:transform-message>
+        <ws:consumer config-ref="Condition" operation="GetConditions" doc:name="Get Conditions"/>
+        <dw:transform-message doc:name="Transform to FHIR Bundle of Conditions">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 http://example.com/condition-service
+---
+{
+	resourceType: "Bundle",
+	type: "searchset",
+	link: [{
+		relation: "self",
+		url: flowVars.requestURI
+	}],
+	total: sizeOf payload.ns0#GetConditionsResponse when payload.ns0#GetConditionsResponse is :object otherwise 0, 
+	(entry: payload.ns0#GetConditionsResponse.*Condition map 
+		{
+			resource: {
+				resourceType: "Condition",
+				id: $.id,
+				patient: {
+					reference: $.patientReference
+				},
+				asserter: {
+					reference: $.asserterReference,
+					display: $.asserterName
+				},
+				code: {
+					coding: [{
+						code: $.conditionCode,
+						display: $.conditionText,
+						system: $.conditionCodingSystem
+					}]
+				},
+				onsetDateTime: $.onsetDateTime,
+				
+				
+				text: {
+					div: "",
+					status: "empty"
+				}
+			}
+		}) when payload.ns0#GetConditionsResponse is :object
+	
+}]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+
+
+</mule>

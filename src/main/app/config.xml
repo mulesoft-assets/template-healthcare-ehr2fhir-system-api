@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:context="http://www.springframework.org/schema/context" 
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit"
+	xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/apikit http://www.mulesoft.org/schema/mule/apikit/current/mule-apikit.xsd
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd">
+
+	<context:property-placeholder location="common.properties,mule.${mule.env}.properties"/>
+
+	<http:listener-config name="api-httpListenerConfig" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
+    
+    <apikit:config name="api-config" raml="healthcare-system-api.raml" consoleEnabled="false" doc:name="Router">
+        <apikit:flow-mapping resource="/Patient" action="post" content-type="application/json" flow-ref="post:/Patient:application/json:api-config"/>
+        <apikit:flow-mapping resource="/Patient/{id}" action="get" flow-ref="get:/Patient/{id}:api-config"/>
+        <apikit:flow-mapping resource="/Patient/{id}" action="put" content-type="application/json" flow-ref="put:/Patient/{id}:application/json:api-config"/>
+        <apikit:flow-mapping resource="/Practitioner" action="get" flow-ref="get:/Practitioner:application/json:api-config"/>
+        <apikit:flow-mapping resource="/Practitioner" action="post" content-type="application/json" flow-ref="post:/Practitioner:application/json:api-config"/>
+        <apikit:flow-mapping resource="/Practitioner/{id}" action="get" flow-ref="get:/Practitioner/{id}:application/json:api-config"/>
+        <apikit:flow-mapping resource="/Practitioner/{id}" action="put" content-type="application/json" flow-ref="put:/Practitioner/{id}:application/json:api-config"/>
+    </apikit:config>
+    
+    <ws:consumer-config name="Patient" service="PatientService" port="PatientServicePort" serviceAddress="http://patientservice.getsandbox.com/patientService" wsdlLocation="PatientService.wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Practitioner" service="PractitionerService" port="PractitionerServicePort" serviceAddress="http://practitionerservice.getsandbox.com/practitionerService" wsdlLocation="PractitionerService.wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Condition" service="ConditionService" port="ConditionServicePort" serviceAddress="http://patientservice.getsandbox.com/patientService" wsdlLocation="ConditionService.wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="AllergyIntolerance" service="AllergyIntoleranceService" port="AllergyIntoleranceServicePort" serviceAddress="http://patientservice.getsandbox.com/allergyIntoleranceService" wsdlLocation="AllergyIntoleranceService.wsdl" doc:name="Web Service Consumer"/>
+    
+</mule>

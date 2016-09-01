@@ -1,0 +1,239 @@
+<?xml version="1.0"?>
+
+<wsdl:definitions name="PractitionerService" targetNamespace="http://example.com/practitioner-service"
+    xmlns:ms="http://example.com/practitioner-service" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+
+    <wsdl:types>
+
+        <xsd:schema targetNamespace="http://example.com/practitioner-service" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   			
+   			<xsd:complexType name="Practitioners">
+            	<xsd:sequence>
+              	 	<xsd:element minOccurs="0" maxOccurs="unbounded" name="Practitioner" nillable="true" type="ms:Practitioner" />
+           	 	</xsd:sequence>
+       		</xsd:complexType>
+    		
+    		<xsd:complexType name="Practitioner">
+                <xsd:all>
+                	<xsd:element name="id"  type="xsd:string" />
+					<xsd:element name="familyName"  type="xsd:string" />
+					<xsd:element name="givenName" type="xsd:string" />
+					<xsd:element name="nameSuffix" type="xsd:string" />
+					<xsd:element name="phoneNumber" type="xsd:string" />
+					<xsd:element name="phoneUse" type="xsd:string" />
+					<xsd:element name="email" type="xsd:string" />
+					<xsd:element name="emailUse"  type="xsd:string" />
+					<xsd:element name="fax"  type="xsd:string" />
+					<xsd:element name="faxUse" type="xsd:string" />
+					<xsd:element name="workAddressLine" type="xsd:string" />
+					<xsd:element name="workAddressCity" type="xsd:string" />
+					<xsd:element name="workAddressPostalCode" type="xsd:string" />
+					<xsd:element name="workAddressCountry" type="xsd:string" />
+					<xsd:element name="gender" type="xsd:string" />
+					<xsd:element name="birthDate" type="xsd:string" />
+               </xsd:all>
+            </xsd:complexType>
+            
+    
+            <xsd:element name="CreatePractitioner" type="ms:Practitioner" />
+            <xsd:element name="CreatePractitionerResponse">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="id" type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+            
+            
+            <xsd:element name="GetPractitioner">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="id"  type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+             <xsd:element name="GetPractitionerResponse">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="Practitioner" type="ms:Practitioner" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="GetPractitioners" type="ms:Practitioner" />
+            <xsd:element name="GetPractitionersResponse" type="ms:Practitioners" />
+            
+            
+            <xsd:element name="UpdatePractitioner" type="ms:Practitioner" />
+            <xsd:element name="UpdatePractitionerResponse">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="status" type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="PractitionerFault">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="errorCode" type="xsd:string" />
+                        <xsd:element name="errorMessage" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+        </xsd:schema>
+    </wsdl:types>
+
+    <wsdl:message name="CreatePractitioner">
+        <wsdl:part name="body" element="ms:CreatePractitioner" />
+    </wsdl:message>
+
+    <wsdl:message name="CreatePractitionerResponse">
+        <wsdl:part name="body" element="ms:CreatePractitionerResponse" />
+    </wsdl:message>
+    
+    
+    <wsdl:message name="GetPractitioner">
+        <wsdl:part name="body" element="ms:GetPractitioner" />
+    </wsdl:message>
+
+    <wsdl:message name="GetPractitionerResponse">
+        <wsdl:part name="body" element="ms:GetPractitionerResponse" />
+    </wsdl:message>
+    
+    
+    <wsdl:message name="GetPractitioners">
+    	<wsdl:part name="body" element="ms:GetPractitioners" />
+    </wsdl:message>
+
+    <wsdl:message name="GetPractitionersResponse">
+        <wsdl:part name="body" element="ms:GetPractitionersResponse" />
+    </wsdl:message>
+    
+    
+    <wsdl:message name="UpdatePractitioner">
+    	<wsdl:part name="body" element="ms:UpdatePractitioner" />
+    </wsdl:message>
+
+    <wsdl:message name="UpdatePractitionerResponse">
+        <wsdl:part name="body" element="ms:UpdatePractitionerResponse" />
+    </wsdl:message>
+    
+    
+    
+    <wsdl:message name="PractitionerFault">
+        <wsdl:part name="fault" element="ms:PractitionerFault" />
+    </wsdl:message>
+
+    <!-- wsdl:portType describes messages in an operation -->
+    <wsdl:portType name="PractitionerServicePortType">
+
+        <wsdl:operation name="CreatePractitioner">
+            <wsdl:input message="ms:CreatePractitioner" />
+            <wsdl:output message="ms:CreatePractitionerResponse" />
+            <wsdl:fault name="PractitionerFault" message="ms:PractitionerFault" />
+        </wsdl:operation>
+        
+        <wsdl:operation name="GetPractitioner">
+            <wsdl:input message="ms:GetPractitioner" />
+            <wsdl:output message="ms:GetPractitionerResponse" />
+            <wsdl:fault name="PractitionerFault" message="ms:PractitionerFault" />
+        </wsdl:operation>
+        
+        <wsdl:operation name="GetPractitioners">
+            <wsdl:input message="ms:GetPractitioners" />
+            <wsdl:output message="ms:GetPractitionersResponse" />
+            <wsdl:fault name="PractitionerFault" message="ms:PractitionerFault" />
+        </wsdl:operation>
+        
+        <wsdl:operation name="UpdatePractitioner">
+            <wsdl:input message="ms:UpdatePractitioner" />
+            <wsdl:output message="ms:UpdatePractitionerResponse" />
+            <wsdl:fault name="PractitionerFault" message="ms:PractitionerFault" />
+        </wsdl:operation>
+        
+          
+    </wsdl:portType>
+
+    <wsdl:binding name="PractitionerServiceSoapBinding" type="ms:PractitionerServicePortType">
+
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+
+        <wsdl:operation name="CreatePractitioner">
+
+            <soap:operation soapAction="http://example.com/practitioner-service/create-practitioner" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/practitioner-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/practitioner-service" />
+            </wsdl:output>
+            <wsdl:fault name="PractitionerFault">
+                <soap:body use="literal" namespace="http://example.com/practitioner-service" />
+            </wsdl:fault>
+            
+        </wsdl:operation>
+        
+        <wsdl:operation name="GetPractitioner">
+
+            <soap:operation soapAction="http://example.com/practitioner-service/get-practitioner" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/practitioner-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/practitioner-service" />
+            </wsdl:output>
+            <wsdl:fault name="PractitionerFault">
+                <soap:body use="literal" namespace="http://example.com/practitioner-service" />
+            </wsdl:fault>
+        </wsdl:operation>
+        
+        
+        <wsdl:operation name="GetPractitioners">
+
+            <soap:operation soapAction="http://example.com/practitioner-service/get-practitioners" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/practitioner-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/practitioner-service" />
+            </wsdl:output>
+            <wsdl:fault name="PractitionerFault">
+                <soap:body use="literal" namespace="http://example.com/practitioner-service" />
+            </wsdl:fault>
+        </wsdl:operation>
+        
+        
+        <wsdl:operation name="UpdatePractitioner">
+
+            <soap:operation soapAction="http://example.com/practitioner-service/update-practitioner" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/practitioner-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/practitioner-service" />
+            </wsdl:output>
+            <wsdl:fault name="PractitionerFault">
+                <soap:body use="literal" namespace="http://example.com/practitioner-service" />
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="PractitionerService">
+        <wsdl:documentation></wsdl:documentation>
+
+        <!-- connect it to the binding "EndorsementSearchSoapBinding" above -->
+        <wsdl:port name="PractitionerServicePort" binding="ms:PractitionerServiceSoapBinding">
+
+            <!-- give the binding an network address -->
+            <soap:address location="http://practitionerservice.getsandbox.com/practitionerService" />
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>

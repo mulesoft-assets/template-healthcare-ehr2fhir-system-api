@@ -1,0 +1,239 @@
+<?xml version="1.0"?>
+
+<wsdl:definitions name="ConditionService" targetNamespace="http://example.com/condition-service"
+    xmlns:ms="http://example.com/condition-service" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+
+    <wsdl:types>
+
+        <xsd:schema targetNamespace="http://example.com/condition-service" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   			
+   			<xsd:complexType name="Conditions">
+            	<xsd:sequence>
+              	 	<xsd:element minOccurs="0" maxOccurs="unbounded" name="Condition" nillable="true" type="ms:Condition" />
+           	 	</xsd:sequence>
+       		</xsd:complexType>
+    		
+    		<xsd:complexType name="Condition">
+                <xsd:all>
+                	<xsd:element name="id"  type="xsd:string" />
+                	<xsd:element name="conditionCode"  type="xsd:string" />
+					<xsd:element name="conditionCodingSystem"  type="xsd:string" />
+					<xsd:element name="onsetDateTime" type="xsd:string" />
+					<xsd:element name="conditionText" type="xsd:string" />
+					<xsd:element name="asserterName" type="xsd:string" />
+					<xsd:element name="asserterReference" type="xsd:string" />
+					<xsd:element name="patientReference" type="xsd:string" />
+					<xsd:element name="verificationStatus" type="xsd:string" />
+               </xsd:all>
+            </xsd:complexType>
+            
+    
+            <xsd:element name="CreateCondition" type="ms:Condition" />
+            <xsd:element name="CreateConditionResponse">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="id" type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+            
+            
+            <xsd:element name="GetCondition">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="id"  type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+             <xsd:element name="GetConditionResponse">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="Condition" type="ms:Condition" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+            
+            
+            <xsd:element name="GetConditions">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="patientID"  type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="GetConditionsResponse" type="ms:Conditions" />
+            
+            
+            <xsd:element name="UpdateCondition" type="ms:Condition" />
+            <xsd:element name="UpdateConditionResponse">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="status" type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="ConditionFault">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="errorCode" type="xsd:string" />
+                        <xsd:element name="errorMessage" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+        </xsd:schema>
+    </wsdl:types>
+
+    <wsdl:message name="CreateCondition">
+        <wsdl:part name="body" element="ms:CreateCondition" />
+    </wsdl:message>
+
+    <wsdl:message name="CreateConditionResponse">
+        <wsdl:part name="body" element="ms:CreateConditionResponse" />
+    </wsdl:message>
+    
+    
+    <wsdl:message name="GetCondition">
+        <wsdl:part name="body" element="ms:GetCondition" />
+    </wsdl:message>
+
+    <wsdl:message name="GetConditionResponse">
+        <wsdl:part name="body" element="ms:GetConditionResponse" />
+    </wsdl:message>
+    
+    
+    <wsdl:message name="GetConditions">
+    	<wsdl:part name="body" element="ms:GetConditions" />
+    </wsdl:message>
+
+    <wsdl:message name="GetConditionsResponse">
+        <wsdl:part name="body" element="ms:GetConditionsResponse" />
+    </wsdl:message>
+    
+    
+    <wsdl:message name="UpdateCondition">
+    	<wsdl:part name="body" element="ms:UpdateCondition" />
+    </wsdl:message>
+
+    <wsdl:message name="UpdateConditionResponse">
+        <wsdl:part name="body" element="ms:UpdateConditionResponse" />
+    </wsdl:message>
+    
+    
+    
+    <wsdl:message name="ConditionFault">
+        <wsdl:part name="fault" element="ms:ConditionFault" />
+    </wsdl:message>
+
+    <!-- wsdl:portType describes messages in an operation -->
+    <wsdl:portType name="ConditionServicePortType">
+
+        <wsdl:operation name="CreateCondition">
+            <wsdl:input message="ms:CreateCondition" />
+            <wsdl:output message="ms:CreateConditionResponse" />
+            <wsdl:fault name="ConditionFault" message="ms:ConditionFault" />
+        </wsdl:operation>
+        
+        <wsdl:operation name="GetCondition">
+            <wsdl:input message="ms:GetCondition" />
+            <wsdl:output message="ms:GetConditionResponse" />
+            <wsdl:fault name="ConditionFault" message="ms:ConditionFault" />
+        </wsdl:operation>
+        
+        <wsdl:operation name="GetConditions">
+            <wsdl:input message="ms:GetConditions" />
+            <wsdl:output message="ms:GetConditionsResponse" />
+            <wsdl:fault name="ConditionFault" message="ms:ConditionFault" />
+        </wsdl:operation>
+        
+        <wsdl:operation name="UpdateCondition">
+            <wsdl:input message="ms:UpdateCondition" />
+            <wsdl:output message="ms:UpdateConditionResponse" />
+            <wsdl:fault name="ConditionFault" message="ms:ConditionFault" />
+        </wsdl:operation>
+        
+          
+    </wsdl:portType>
+
+    <wsdl:binding name="ConditionServiceSoapBinding" type="ms:ConditionServicePortType">
+
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+
+        <wsdl:operation name="CreateCondition">
+
+            <soap:operation soapAction="http://example.com/condition-service/create-condition" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/condition-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/condition-service" />
+            </wsdl:output>
+            <wsdl:fault name="ConditionFault">
+                <soap:body use="literal" namespace="http://example.com/condition-service" />
+            </wsdl:fault>
+            
+        </wsdl:operation>
+        
+        <wsdl:operation name="GetCondition">
+
+            <soap:operation soapAction="http://example.com/condition-service/get-condition" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/condition-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/condition-service" />
+            </wsdl:output>
+            <wsdl:fault name="ConditionFault">
+                <soap:body use="literal" namespace="http://example.com/condition-service" />
+            </wsdl:fault>
+        </wsdl:operation>
+        
+        
+        <wsdl:operation name="GetConditions">
+
+            <soap:operation soapAction="http://example.com/condition-service/get-conditions" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/condition-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/condition-service" />
+            </wsdl:output>
+            <wsdl:fault name="ConditionFault">
+                <soap:body use="literal" namespace="http://example.com/condition-service" />
+            </wsdl:fault>
+        </wsdl:operation>
+        
+        
+        <wsdl:operation name="UpdateCondition">
+
+            <soap:operation soapAction="http://example.com/condition-service/update-condition" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/condition-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/condition-service" />
+            </wsdl:output>
+            <wsdl:fault name="ConditionFault">
+                <soap:body use="literal" namespace="http://example.com/condition-service" />
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="ConditionService">
+        <wsdl:documentation></wsdl:documentation>
+
+        <!-- connect it to the binding "EndorsementSearchSoapBinding" above -->
+        <wsdl:port name="ConditionServicePort" binding="ms:ConditionServiceSoapBinding">
+
+            <!-- give the binding an network address -->
+            <soap:address location="http://patientservice.getsandbox.com/patientService" />
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>
