@@ -3,11 +3,11 @@
 <mule xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
 	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
 	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.8.1"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="
-http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd 
-http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
 
 <flow name="post:/Practitioner:application/json:api-config">
@@ -112,8 +112,8 @@ payload.UpdatePractitionerResponse.status]]></dw:set-property>
 %namespace ns0 http://example.com/practitioner-service
 ---
 {
-	message: payload.Fault.errorMessage
-} when payload.Fault != null otherwise
+	message: payload.PractitionerFault.errorMessage
+} when payload.PractitionerFault != null otherwise
 
 using (practitioner = payload.GetPractitionerResponse.Practitioner){
 	resourceType: "Practitioner",
@@ -160,7 +160,7 @@ using (practitioner = payload.GetPractitionerResponse.Practitioner){
             <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
 %output application/java
 ---
-404 when payload.Fault != null otherwise 200]]></dw:set-property>
+404 when payload.PractitionerFault != null otherwise 200]]></dw:set-property>
         </dw:transform-message>
     </flow>
     <flow name="get:/Practitioner:application/json:api-config">
@@ -185,47 +185,54 @@ using (practitioner = payload.GetPractitionerResponse.Practitioner){
 	type: "searchset",
 	total: sizeOf payload.ns0#GetPractitionersResponse.*Practitioner 
 			when payload.ns0#GetPractitionersResponse is :object otherwise 0,
+	meta: {
+		lastUpdated: now
+	},
 	link: [{
 		relation: "self",
 		url: p('baseUri') ++ "Practitioner"
 	}],
-	(entry: payload.ns0#GetPractitionersResponse.*Practitioner map {
-		resourceType: "Practitioner",
-		id: $.id,
-		address: [{
-			city: $.workAddressCity,
-			country: $.workAddressCountry,
-			line: [
-	      		$.workAddressLine
-	    	],
-			postalCode: $.workAddressPostalCode	
-		}],
-		birthDate: $.birthDate,
-		gender: $.gender,
-		name: [{
-			use: "official",
-			family: [$.familyName],
-			given: [$.givenName],
-			(prefix: [$.title]) when $.title != null,
-			(suffix: [$.nameSuffix])  when $.nameSuffix != null
-		}],
-		telecom: [
-			({
-				system: "phone",
-				use: $.phoneUse,
-				value: $.phoneNumber
-			}) when trim $.phoneNumber != "",
-			({
-				system: "fax",
-				use: $.faxUse,
-				value: $.fax
-			}) when trim $.fax != "",
-			({
-				system: "email",
-				use: $.emailUse,
-				value: $.email
-			}) when trim $.email != ""
-		]
+	(entry: payload.ns0#GetPractitionersResponse.*Practitioner map 
+		{	
+			fullUrl: p('baseUri') ++ "Practitioner/" ++ $.id,
+			resource: {
+				resourceType: "Practitioner",
+				id: $.id,
+				address: [{
+					city: $.workAddressCity,
+					country: $.workAddressCountry,
+					line: [
+			      		$.workAddressLine
+			    	],
+					postalCode: $.workAddressPostalCode	
+				}],
+				birthDate: $.birthDate,
+				gender: $.gender,
+				name: [{
+					use: "official",
+					family: [$.familyName],
+					given: [$.givenName],
+					(prefix: [$.title]) when $.title != null,
+					(suffix: [$.nameSuffix])  when $.nameSuffix != null
+				}],
+				telecom: [
+					({
+						system: "phone",
+						use: $.phoneUse,
+						value: $.phoneNumber
+					}) when trim $.phoneNumber != "",
+					({
+						system: "fax",
+						use: $.faxUse,
+						value: $.fax
+					}) when trim $.fax != "",
+					({
+						system: "email",
+						use: $.emailUse,
+						value: $.email
+					}) when trim $.email != ""
+				]	
+			}
 	}) when payload.ns0#GetPractitionersResponse is :object
 }]]></dw:set-payload>
         </dw:transform-message>

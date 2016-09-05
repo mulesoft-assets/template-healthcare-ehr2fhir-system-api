@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 
-<wsdl:definitions name="AllergyIntoleranceService" targetNamespace="http://example.com/allergyIntolerance-service"
-    xmlns:ms="http://example.com/allergyIntolerance-service" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+<wsdl:definitions name="AllergyIntoleranceService" targetNamespace="http://example.com/allergy-service"
+    xmlns:ms="http://example.com/allergy-service" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
 
     <wsdl:types>
 
-        <xsd:schema targetNamespace="http://example.com/allergyIntolerance-service" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+        <xsd:schema targetNamespace="http://example.com/allergy-service" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
    			
    			<xsd:complexType name="AllergyIntolerances">
             	<xsd:sequence>
@@ -127,7 +127,7 @@
     </wsdl:message>
 
     <!-- wsdl:portType describes messages in an operation -->
-    <wsdl:portType name="AllergyIntoleranceServicePortType">
+    <wsdl:portType name="AllergyServicePortType">
 
         <wsdl:operation name="CreateAllergyIntolerance">
             <wsdl:input message="ms:CreateAllergyIntolerance" />
@@ -156,82 +156,82 @@
           
     </wsdl:portType>
 
-    <wsdl:binding name="AllergyIntoleranceServiceSoapBinding" type="ms:AllergyIntoleranceServicePortType">
+    <wsdl:binding name="AllergyServiceSoapBinding" type="ms:AllergyServicePortType">
 
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
 
         <wsdl:operation name="CreateAllergyIntolerance">
 
-            <soap:operation soapAction="http://example.com/allergyIntolerance-service/create-allergyIntolerance" />
+            <soap:operation soapAction="http://example.com/allergy-service/create-allergyIntolerance" />
 
             <wsdl:input>
-                <soap:body use="literal" namespace="http://example.com/allergyIntolerance-service" />
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
             </wsdl:input>
             <wsdl:output>
-                <soap:body use="literal" namespace="http://example.com/allergyIntolerance-service" />
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
             </wsdl:output>
             <wsdl:fault name="AllergyIntoleranceFault">
-                <soap:body use="literal" namespace="http://example.com/allergyIntolerance-service" />
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
             </wsdl:fault>
             
         </wsdl:operation>
         
         <wsdl:operation name="GetAllergyIntolerance">
 
-            <soap:operation soapAction="http://example.com/allergyIntolerance-service/get-allergyIntolerance" />
+            <soap:operation soapAction="http://example.com/allergy-service/get-allergyIntolerance" />
 
             <wsdl:input>
-                <soap:body use="literal" namespace="http://example.com/allergyIntolerance-service" />
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
             </wsdl:input>
             <wsdl:output>
-                <soap:body use="literal" namespace="http://example.com/allergyIntolerance-service" />
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
             </wsdl:output>
             <wsdl:fault name="AllergyIntoleranceFault">
-                <soap:body use="literal" namespace="http://example.com/allergyIntolerance-service" />
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
             </wsdl:fault>
         </wsdl:operation>
         
         
         <wsdl:operation name="GetAllergyIntolerances">
 
-            <soap:operation soapAction="http://example.com/allergyIntolerance-service/get-allergyIntolerances" />
+            <soap:operation soapAction="http://example.com/allergy-service/get-allergyIntolerances" />
 
             <wsdl:input>
-                <soap:body use="literal" namespace="http://example.com/allergyIntolerance-service" />
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
             </wsdl:input>
             <wsdl:output>
-                <soap:body use="literal" namespace="http://example.com/allergyIntolerance-service" />
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
             </wsdl:output>
             <wsdl:fault name="AllergyIntoleranceFault">
-                <soap:body use="literal" namespace="http://example.com/allergyIntolerance-service" />
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
             </wsdl:fault>
         </wsdl:operation>
         
         
         <wsdl:operation name="UpdateAllergyIntolerance">
 
-            <soap:operation soapAction="http://example.com/allergyIntolerance-service/update-allergyIntolerance" />
+            <soap:operation soapAction="http://example.com/allergy-service/update-allergyIntolerance" />
 
             <wsdl:input>
-                <soap:body use="literal" namespace="http://example.com/allergyIntolerance-service" />
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
             </wsdl:input>
             <wsdl:output>
-                <soap:body use="literal" namespace="http://example.com/allergyIntolerance-service" />
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
             </wsdl:output>
             <wsdl:fault name="AllergyIntoleranceFault">
-                <soap:body use="literal" namespace="http://example.com/allergyIntolerance-service" />
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
             </wsdl:fault>
         </wsdl:operation>
     </wsdl:binding>
 
-    <wsdl:service name="AllergyIntoleranceService">
+    <wsdl:service name="AllergyService">
         <wsdl:documentation></wsdl:documentation>
 
         <!-- connect it to the binding "EndorsementSearchSoapBinding" above -->
-        <wsdl:port name="AllergyIntoleranceServicePort" binding="ms:AllergyIntoleranceServiceSoapBinding">
+        <wsdl:port name="AllergyServicePort" binding="ms:AllergyServiceSoapBinding">
 
             <!-- give the binding an network address -->
-            <soap:address location="http://patientservice.getsandbox.com/allergyIntoleranceService" />
+            <soap:address location="http://allergyservice.getsandbox.com/allergyService" />
         </wsdl:port>
     </wsdl:service>
 

@@ -38,9 +38,13 @@ inboundProperties."http.request.uri"]]></dw:set-variable>
 		relation: "self",
 		url: flowVars.requestURI
 	}],
+	meta: {
+		lastUpdated: now
+	},
 	total: sizeOf payload.ns0#GetPatientsResponse when payload.ns0#GetPatientsResponse is :object otherwise 0, 
 	(entry: payload.ns0#GetPatientsResponse.*Patient map 
 		{
+			fullUrl: p('baseUri') ++ "Patient/" ++ $.id,
 			resource: {
 				resourceType: "Patient",
 				id: $.id,
@@ -107,8 +111,8 @@ inboundProperties."http.request.uri"]]></dw:set-variable>
 %namespace ns0 http://example.com/patient-service
 ---
 {
-	message: payload.Fault.errorMessage
-} when payload.Fault != null otherwise
+	message: payload.PatientFault.errorMessage
+} when payload.PatientFault != null otherwise
 
 using (patient = payload.ns0#GetPatientResponse.Patient){
 	resourceType: "Patient",
@@ -154,7 +158,7 @@ using (patient = payload.ns0#GetPatientResponse.Patient){
             <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
 %output application/java
 ---
-404 when payload.Fault != null otherwise 200]]></dw:set-property>
+404 when payload.PatientFault != null otherwise 200]]></dw:set-property>
         </dw:transform-message>
     </flow>
 
@@ -257,7 +261,7 @@ payload.UpdatePatientResponse.status]]></dw:set-property>
             <dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0
 %output application/java
 ---
-inboundProperties."http.request.uri"]]></dw:set-variable>
+inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
         </dw:transform-message>
         <ws:consumer config-ref="Condition" operation="GetConditions" doc:name="Get Conditions"/>
         <dw:transform-message doc:name="Transform to FHIR Bundle of Conditions">
@@ -272,9 +276,13 @@ inboundProperties."http.request.uri"]]></dw:set-variable>
 		relation: "self",
 		url: flowVars.requestURI
 	}],
-	total: sizeOf payload.ns0#GetConditionsResponse when payload.ns0#GetConditionsResponse is :object otherwise 0, 
+	meta: {
+		lastUpdated: now
+	},
+	total: sizeOf payload.ns0#GetConditionsResponse when payload.ns0#GetConditionsResponse is :object otherwise 0,
 	(entry: payload.ns0#GetConditionsResponse.*Condition map 
 		{
+			fullUrl: p('baseUri') ++ "Condition/" ++ $.id,
 			resource: {
 				resourceType: "Condition",
 				id: $.id,
@@ -292,16 +300,78 @@ inboundProperties."http.request.uri"]]></dw:set-variable>
 						system: $.conditionCodingSystem
 					}]
 				},
+				verificationStatus: $.verificationStatus,
 				onsetDateTime: $.onsetDateTime,
-				
-				
 				text: {
 					div: "",
 					status: "empty"
 				}
 			}
-		}) when payload.ns0#GetConditionsResponse is :object
+	}) when payload.ns0#GetConditionsResponse is :object
 	
+}]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+    <flow name="get:/Patient/{id}/AllergyIntolerance:api-config">
+        <dw:transform-message doc:name="Prepare Request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://example.com/allergy-service
+---
+{
+	ns0#GetAllergyIntolerances: {
+		patientID: flowVars.id
+	}
+}]]></dw:set-payload>
+            <dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0
+%output application/java
+---
+inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
+        </dw:transform-message>
+        <ws:consumer config-ref="AllergyIntolerance" operation="GetAllergyIntolerances" doc:name="Get AllergyIntolerances"/>
+        <dw:transform-message doc:name="Transform to FHIR Bundle of AllergyIntolerances">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 http://example.com/allergy-service
+---
+{
+	resourceType: "Bundle",
+	type: "searchset",
+	link: [{
+		relation: "self",
+		url: flowVars.requestURI
+	}],
+	meta: {
+		lastUpdated: now
+	},
+	total: sizeOf payload.ns0#GetAllergyIntolerancesResponse when payload.ns0#GetAllergyIntolerancesResponse is :object otherwise 0,
+	(entry: payload.ns0#GetAllergyIntolerancesResponse.*AllergyIntolerance map 
+		{
+		fullUrl: p('baseUri') ++ "AllergyIntolerance/" ++ $.id,
+		resource: {
+			resourceType: "AllergyIntolerance",
+			id: $.id,
+			patient: {
+				reference: $.patientReference
+			},
+			reporter: {
+				reference: $.reporterReference
+			},
+			substance: {
+				coding: [{
+					code: $.substanceCode,
+					display: $.substanceText
+				}]
+			},
+			recordedDate: $.recordedDate,
+			criticality: $.criticality,
+			type: $.type,
+			text: {
+				div: "",
+				status: "empty"
+			}
+		}
+	}) when payload.ns0#GetAllergyIntolerancesResponse is :object
 }]]></dw:set-payload>
         </dw:transform-message>
     </flow>

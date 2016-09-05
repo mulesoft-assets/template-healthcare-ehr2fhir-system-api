@@ -232,7 +232,7 @@
         <wsdl:port name="ConditionServicePort" binding="ms:ConditionServiceSoapBinding">
 
             <!-- give the binding an network address -->
-            <soap:address location="http://patientservice.getsandbox.com/patientService" />
+            <soap:address location="http://conidtionservice.getsandbox.com/conditionService" />
         </wsdl:port>
     </wsdl:service>
 

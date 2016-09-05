@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml"
+	xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
 	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
 	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
 http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
-http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
 
 
 <flow name="get:/AllergyIntolerance:api-config">
         <dw:transform-message doc:name="Prepare Request">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/xml
-%namespace ns0 http://example.com/allergyIntolerance-service
+%namespace ns0 http://example.com/allergy-service
 ---
 {
 	ns0#GetAllergyIntolerances: {
@@ -26,13 +29,13 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
             <dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0
 %output application/java
 ---
-inboundProperties."http.request.uri"]]></dw:set-variable>
+inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
         </dw:transform-message>
         <ws:consumer config-ref="AllergyIntolerance" operation="GetAllergyIntolerances" doc:name="Get AllergyIntolerances"/>
         <dw:transform-message doc:name="Transform to FHIR Bundle of AllergyIntolerances">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/json
-%namespace ns0 http://example.com/allergyIntolerance-service
+%namespace ns0 http://example.com/allergy-service
 ---
 {
 	resourceType: "Bundle",
@@ -41,34 +44,37 @@ inboundProperties."http.request.uri"]]></dw:set-variable>
 		relation: "self",
 		url: flowVars.requestURI
 	}],
-	total: sizeOf payload.ns0#GetAllergyIntolerancesResponse when payload.ns0#GetAllergyIntolerancesResponse is :object otherwise 0, 
+	meta: {
+		lastUpdated: now
+	},
+	total: sizeOf payload.ns0#GetAllergyIntolerancesResponse when payload.ns0#GetAllergyIntolerancesResponse is :object otherwise 0,
 	(entry: payload.ns0#GetAllergyIntolerancesResponse.*AllergyIntolerance map 
 		{
-			resource: {
-				resourceType: "AllergyIntolerance",
-				id: $.id,
-				patient: {
-					reference: $.patientReference
-				},
-				reporter: {
-					reference: $.reporterReference
-				},
-				code: {
-					coding: [{
-						code: $.substanceCode,
-						display: $.substanceText
-					}]
-				},
-				recordedDate: $.recordedDate,
-				criticality: $.criticality,
-				type: $.type,
-				text: {
-					div: "",
-					status: "empty"
-				}
+		fullUrl: p('baseUri') ++ "AllergyIntolerance/" ++ $.id,
+		resource: {
+			resourceType: "AllergyIntolerance",
+			id: $.id,
+			patient: {
+				reference: $.patientReference
+			},
+			reporter: {
+				reference: $.reporterReference
+			},
+			substance: {
+				coding: [{
+					code: $.substanceCode,
+					display: $.substanceText
+				}]
+			},
+			recordedDate: $.recordedDate,
+			criticality: $.criticality,
+			type: $.type,
+			text: {
+				div: "",
+				status: "empty"
 			}
-		}) when payload.ns0#GetAllergyIntolerancesResponse is :object
-	
+		}
+	}) when payload.ns0#GetAllergyIntolerancesResponse is :object
 }]]></dw:set-payload>
         </dw:transform-message>
     </flow>
@@ -78,36 +84,60 @@ inboundProperties."http.request.uri"]]></dw:set-variable>
         <dw:transform-message doc:name="prepare request">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/xml
-%namespace ns0 http://example.com/allergyIntolerance-service
+%namespace ns0 http://example.com/allergy-service
 ---
 {
 	ns0#CreateAllergyIntolerance: {
 		recordedDate: payload.recordedDate default "",
 		patientReference: payload.patient.reference default "",
 		reporterReference: payload.reporter.reference default "",
-		substanceText: payload.substance.text default "",
+		substanceCode: payload.substance.coding[0].code default "",
+		substanceText: payload.substance.coding[0].display default "",
 		criticality: payload.criticality default "",
 		type: payload.type default ""
 	}
 }]]></dw:set-payload>
         </dw:transform-message>
         <ws:consumer config-ref="AllergyIntolerance" operation="CreateAllergyIntolerance" doc:name="Create AllergyIntolerance"/>
-        <dw:transform-message doc:name="Set Location property and clear payload">
-            <dw:set-payload><![CDATA[%dw 1.0
-%output application/java
----
-null]]></dw:set-payload>
-            <dw:set-property propertyName="Location"><![CDATA[%dw 1.0
+
+        <mulexml:dom-to-xml-transformer doc:name="DOM to XML"/>
+        <choice doc:name="Successful?">
+            <when expression="#[dw('payload.AllergyIntoleranceFault == null')]">
+                <dw:transform-message doc:name="Set Location and http.status property">
+
+                    <dw:set-property propertyName="Location"><![CDATA[%dw 1.0
 %output application/java
 ---
 p('baseUri') ++ 'AllergyIntolerance/' ++ payload.CreateAllergyIntoleranceResponse.id]]></dw:set-property>
-        </dw:transform-message>
+                    <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+---
+201]]></dw:set-property>
+                </dw:transform-message>
+                <set-payload value="#[NullPayload.getInstance()]" doc:name="NullPayload"/>
+            </when>
+            <otherwise>
+                <dw:transform-message doc:name="Error message">
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	message: payload.AllergyIntoleranceFault.errorMessage
+}]]></dw:set-payload>
+                    <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+---
+422]]></dw:set-property>
+                </dw:transform-message>
+
+            </otherwise>
+        </choice>
     </flow>
     <flow name="put:/AllergyIntolerance/{id}:application/json:api-config">
         <dw:transform-message doc:name="prepare request">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/xml
-%namespace ns0 http://example.com/allergyIntolerance-service
+%namespace ns0 http://example.com/allergy-service
 ---
 {
 	ns0#UpdateAllergyIntolerance: {
@@ -115,23 +145,41 @@ p('baseUri') ++ 'AllergyIntolerance/' ++ payload.CreateAllergyIntoleranceRespons
 		recordedDate: payload.recordedDate default "",
 		patientReference: payload.patient.reference default "",
 		reporterReference: payload.reporter.reference default "",
-		substanceText: payload.substance.text default "",
+		substanceCode: payload.substance.coding[0].code default "",
+		substanceText: payload.substance.coding[0].display default "",
 		criticality: payload.criticality default "",
 		type: payload.type default ""
 	}
 }]]></dw:set-payload>
         </dw:transform-message>
         <ws:consumer config-ref="AllergyIntolerance" operation="UpdateAllergyIntolerance" doc:name="Update AllergyIntolerance"/>
-        <dw:transform-message doc:name="Set HTTP status">
-            <dw:set-payload><![CDATA[%dw 1.0
-%output application/java
----
-null]]></dw:set-payload>
-            <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+
+        <mulexml:dom-to-xml-transformer doc:name="DOM to XML"/>
+        <choice doc:name="Successful?">
+            <when expression="#[dw('payload.AllergyIntoleranceFault == null')]">
+                <dw:transform-message doc:name="Set http.status property">
+                    <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
 %output application/java
 ---
 payload.UpdateAllergyIntoleranceResponse.status]]></dw:set-property>
-        </dw:transform-message>
+                </dw:transform-message>
+                <set-payload value="#[NullPayload.getInstance()]" doc:name="NullPayload"/>
+            </when>
+            <otherwise>
+                <dw:transform-message doc:name="Error message">
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	message: payload.AllergyIntoleranceFault.errorMessage
+}]]></dw:set-payload>
+                    <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+---
+payload.AllergyIntoleranceFault.errorCode]]></dw:set-property>
+                </dw:transform-message>
+            </otherwise>
+        </choice>
 
 
     </flow>

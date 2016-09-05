@@ -19,19 +19,11 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 
 	<http:listener-config name="api-httpListenerConfig" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
     
-    <apikit:config name="api-config" raml="healthcare-system-api.raml" consoleEnabled="false" doc:name="Router">
-        <apikit:flow-mapping resource="/Patient" action="post" content-type="application/json" flow-ref="post:/Patient:application/json:api-config"/>
-        <apikit:flow-mapping resource="/Patient/{id}" action="get" flow-ref="get:/Patient/{id}:api-config"/>
-        <apikit:flow-mapping resource="/Patient/{id}" action="put" content-type="application/json" flow-ref="put:/Patient/{id}:application/json:api-config"/>
-        <apikit:flow-mapping resource="/Practitioner" action="get" flow-ref="get:/Practitioner:application/json:api-config"/>
-        <apikit:flow-mapping resource="/Practitioner" action="post" content-type="application/json" flow-ref="post:/Practitioner:application/json:api-config"/>
-        <apikit:flow-mapping resource="/Practitioner/{id}" action="get" flow-ref="get:/Practitioner/{id}:application/json:api-config"/>
-        <apikit:flow-mapping resource="/Practitioner/{id}" action="put" content-type="application/json" flow-ref="put:/Practitioner/{id}:application/json:api-config"/>
-    </apikit:config>
+    <apikit:config name="api-config" raml="healthcare-system-api.raml" consoleEnabled="false" doc:name="Router"/>
     
     <ws:consumer-config name="Patient" service="PatientService" port="PatientServicePort" serviceAddress="http://patientservice.getsandbox.com/patientService" wsdlLocation="PatientService.wsdl" doc:name="Web Service Consumer"/>
     <ws:consumer-config name="Practitioner" service="PractitionerService" port="PractitionerServicePort" serviceAddress="http://practitionerservice.getsandbox.com/practitionerService" wsdlLocation="PractitionerService.wsdl" doc:name="Web Service Consumer"/>
-    <ws:consumer-config name="Condition" service="ConditionService" port="ConditionServicePort" serviceAddress="http://patientservice.getsandbox.com/patientService" wsdlLocation="ConditionService.wsdl" doc:name="Web Service Consumer"/>
-    <ws:consumer-config name="AllergyIntolerance" service="AllergyIntoleranceService" port="AllergyIntoleranceServicePort" serviceAddress="http://patientservice.getsandbox.com/allergyIntoleranceService" wsdlLocation="AllergyIntoleranceService.wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Condition" service="ConditionService" port="ConditionServicePort" serviceAddress="http://conidtionservice.getsandbox.com/conditionService" wsdlLocation="ConditionService.wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="AllergyIntolerance" service="AllergyService" port="AllergyServicePort" serviceAddress="http://allergyservice.getsandbox.com/allergyService" wsdlLocation="AllergyIntoleranceService.wsdl" doc:name="Web Service Consumer"/>
     
 </mule>

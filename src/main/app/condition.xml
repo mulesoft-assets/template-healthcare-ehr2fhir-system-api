@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
+<mule xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml"  
+	xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" 
+	xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
 	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
 http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd">
 
 <flow name="get:/Condition:api-config">
         <dw:transform-message doc:name="Prepare Request">
@@ -19,14 +23,13 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 ---
 {
 	ns0#GetConditions: {
-		(patientID: (inboundProperties."http.query.params".patient splitBy '/')[-1] )
-		when inboundProperties."http.query.params".patient != null
+		patientID: (inboundProperties."http.query.params".patient splitBy '/')[-1]
 	}
 }]]></dw:set-payload>
             <dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0
 %output application/java
 ---
-inboundProperties."http.request.uri"]]></dw:set-variable>
+inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
         </dw:transform-message>
         <ws:consumer config-ref="Condition" operation="GetConditions" doc:name="Get Conditions"/>
         <dw:transform-message doc:name="Transform to FHIR Bundle of Conditions">
@@ -41,9 +44,13 @@ inboundProperties."http.request.uri"]]></dw:set-variable>
 		relation: "self",
 		url: flowVars.requestURI
 	}],
-	total: sizeOf payload.ns0#GetConditionsResponse when payload.ns0#GetConditionsResponse is :object otherwise 0, 
+	meta: {
+		lastUpdated: now
+	},
+	total: sizeOf payload.ns0#GetConditionsResponse when payload.ns0#GetConditionsResponse is :object otherwise 0,
 	(entry: payload.ns0#GetConditionsResponse.*Condition map 
 		{
+			fullUrl: p('baseUri') ++ "Condition/" ++ $.id,
 			resource: {
 				resourceType: "Condition",
 				id: $.id,
@@ -61,16 +68,14 @@ inboundProperties."http.request.uri"]]></dw:set-variable>
 						system: $.conditionCodingSystem
 					}]
 				},
+				verificationStatus: $.verificationStatus,
 				onsetDateTime: $.onsetDateTime,
-				
-				
 				text: {
 					div: "",
 					status: "empty"
 				}
 			}
-		}) when payload.ns0#GetConditionsResponse is :object
-	
+	}) when payload.ns0#GetConditionsResponse is :object
 }]]></dw:set-payload>
         </dw:transform-message>
     </flow>
@@ -90,21 +95,45 @@ inboundProperties."http.request.uri"]]></dw:set-variable>
 		conditionText: payload.code.coding[0].display default "",
 		asserterName: payload.asserter.display default "",
 		asserterReference: payload.asserter.reference default "",
-		patientReference: payload.patient.reference default ""
+		patientReference: payload.patient.reference default "",
+		verificationStatus: payload.verificationStatus default "" 
 	}
 }]]></dw:set-payload>
         </dw:transform-message>
         <ws:consumer config-ref="Condition" operation="CreateCondition" doc:name="Create Condition"/>
-        <dw:transform-message doc:name="Set Location property and clear payload">
-            <dw:set-payload><![CDATA[%dw 1.0
-%output application/java
----
-null]]></dw:set-payload>
-            <dw:set-property propertyName="Location"><![CDATA[%dw 1.0
+        <mulexml:dom-to-xml-transformer doc:name="DOM to XML"/>
+        <choice doc:name="Successful?">
+            <when expression="#[dw('payload.ConditionFault == null')]">
+                <dw:transform-message doc:name="Set Location and http.status property">
+
+                    <dw:set-property propertyName="Location"><![CDATA[%dw 1.0
 %output application/java
 ---
 p('baseUri') ++ 'Condition/' ++ payload.CreateConditionResponse.id]]></dw:set-property>
-        </dw:transform-message>
+                    <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+---
+201]]></dw:set-property>
+                </dw:transform-message>
+                <set-payload value="#[NullPayload.getInstance()]" doc:name="NullPayload"/>
+            </when>
+            <otherwise>
+                <dw:transform-message doc:name="Error message">
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	message: payload.ConditionFault.errorMessage
+}]]></dw:set-payload>
+                    <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+---
+422]]></dw:set-property>
+                </dw:transform-message>
+
+            </otherwise>
+        </choice>
+
     </flow>
     <flow name="put:/Condition/{id}:application/json:api-config">
         <dw:transform-message doc:name="prepare request">
@@ -121,21 +150,38 @@ p('baseUri') ++ 'Condition/' ++ payload.CreateConditionResponse.id]]></dw:set-pr
 		conditionText: payload.code.coding[0].display default "",
 		asserterName: payload.asserter.display default "",
 		asserterReference: payload.asserter.reference default "",
-		patientReference: payload.patient.reference default ""
+		patientReference: payload.patient.reference default "",
+		verificationStatus: payload.verificationStatus default ""
 	}
 }]]></dw:set-payload>
         </dw:transform-message>
         <ws:consumer config-ref="Condition" operation="UpdateCondition" doc:name="Update Condition"/>
-        <dw:transform-message doc:name="Set HTTP status">
-            <dw:set-payload><![CDATA[%dw 1.0
-%output application/java
----
-null]]></dw:set-payload>
-            <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+        <mulexml:dom-to-xml-transformer doc:name="DOM to XML"/>
+        <choice doc:name="Successful?">
+            <when expression="#[dw('payload.ConditionFault == null')]">
+                <dw:transform-message doc:name="Set http.status property">
+                    <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
 %output application/java
 ---
 payload.UpdateConditionResponse.status]]></dw:set-property>
-        </dw:transform-message>
+                </dw:transform-message>
+                <set-payload value="#[NullPayload.getInstance()]" doc:name="NullPayload"/>
+            </when>
+            <otherwise>
+                <dw:transform-message doc:name="Error message">
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	message: payload.ConditionFault.errorMessage
+}]]></dw:set-payload>
+                    <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+---
+payload.ConditionFault.errorCode]]></dw:set-property>
+                </dw:transform-message>
+            </otherwise>
+        </choice>
 
 
     </flow>
