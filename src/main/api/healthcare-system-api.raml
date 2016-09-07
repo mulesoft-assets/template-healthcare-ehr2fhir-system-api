@@ -1,7 +1,7 @@
 #%RAML 1.0
 title: Healthcare FHIR System API
 version: v1
-baseUri: http://localhost:8081/api/
+baseUri: http://portal-ehr2fhir-system-api.cloudhub.io/api
 mediaType: [application/xml+fhir, application/json+fhir]
 
 types:
@@ -256,29 +256,29 @@ traits:
     post:
       is: [ allergyIntolerancePOSTSearch ]
 
-#/Appointment:
-#  type: fhirResourceType
-#  get:
-#    is: [ appointmentSearch ]
-#  put:
-#    is: [ appointmentSearch, conditionalOperation ]
-#  delete:
-#    is: [ appointmentSearch, conditionalOperation ]
-#  /_history:
-#    type: { fhirHistory: { bundleName: AppointmentBundle } }
-#    is: [ appointmentSearch ]
-#  /{id}:
-#    type: fhirResource
-#    /_history:
-#      type: { fhirHistory: { bundleName: AppointmentBundle } }
-#      /{vid}:
-#        type: { fhirVersionedResource: { resourceName: Appointment } }
-#  /_search:
-#    type: { fhirSearch: { bundleName: AppointmentBundle } }
-#    get:
-#      is: [ appointmentSearch ]
-#    post:
-#      is: [ appointmentPOSTSearch ]
+/Appointment:
+  type: fhirResourceType
+  get:
+    is: [ appointmentSearch ]
+  put:
+    is: [ appointmentSearch, conditionalOperation ]
+  delete:
+    is: [ appointmentSearch, conditionalOperation ]
+  /_history:
+    type: { fhirHistory: { bundleName: AppointmentBundle } }
+    is: [ appointmentSearch ]
+  /{id}:
+    type: fhirResource
+    /_history:
+      type: { fhirHistory: { bundleName: AppointmentBundle } }
+      /{vid}:
+        type: { fhirVersionedResource: { resourceName: Appointment } }
+  /_search:
+    type: { fhirSearch: { bundleName: AppointmentBundle } }
+    get:
+      is: [ appointmentSearch ]
+    post:
+      is: [ appointmentPOSTSearch ]
 
 /Condition:
   type: fhirResourceType
@@ -495,51 +495,51 @@ traits:
     post:
       is: [ practitionerPOSTSearch ]
 
-#/Schedule:
-#  type: fhirResourceType
-#  get:
-#    is: [ scheduleSearch ]
-#  put:
-#    is: [ scheduleSearch, conditionalOperation ]
-#  delete:
-#    is: [ scheduleSearch, conditionalOperation ]
-#  /_history:
-#    type: { fhirHistory: { bundleName: ScheduleBundle } }
-#    is: [ scheduleSearch ]
-#  /{id}:
-#    type: fhirResource
-#    /_history:
-#      type: { fhirHistory: { bundleName: ScheduleBundle } }
-#      /{vid}:
-#        type: { fhirVersionedResource: { resourceName: Schedule } }
-#  /_search:
-#    type: { fhirSearch: { bundleName: ScheduleBundle } }
-#    get:
-#      is: [ scheduleSearch ]
-#    post:
-#      is: [ schedulePOSTSearch ]
-#
-#/Slot:
-#  type: fhirResourceType
-#  get:
-#    is: [ slotSearch ]
-#  put:
-#    is: [ slotSearch, conditionalOperation ]
-#  delete:
-#    is: [ slotSearch, conditionalOperation ]
-#  /_history:
-#    type: { fhirHistory: { bundleName: SlotBundle } }
-#    is: [ slotSearch ]
-#  /{id}:
-#    type: fhirResource
-#    /_history:
-#      type: { fhirHistory: { bundleName: SlotBundle } }
-#      /{vid}:
-#        type: { fhirVersionedResource: { resourceName: Slot } }
-#  /_search:
-#    type: { fhirSearch: { bundleName: SlotBundle } }
-#    get:
-#      is: [ slotSearch ]
-#    post:
-#      is: [ slotPOSTSearch ]
+/Schedule:
+  type: fhirResourceType
+  get:
+    is: [ scheduleSearch ]
+  put:
+    is: [ scheduleSearch, conditionalOperation ]
+  delete:
+    is: [ scheduleSearch, conditionalOperation ]
+  /_history:
+    type: { fhirHistory: { bundleName: ScheduleBundle } }
+    is: [ scheduleSearch ]
+  /{id}:
+    type: fhirResource
+    /_history:
+      type: { fhirHistory: { bundleName: ScheduleBundle } }
+      /{vid}:
+        type: { fhirVersionedResource: { resourceName: Schedule } }
+  /_search:
+    type: { fhirSearch: { bundleName: ScheduleBundle } }
+    get:
+      is: [ scheduleSearch ]
+    post:
+      is: [ schedulePOSTSearch ]
+
+/Slot:
+  type: fhirResourceType
+  get:
+    is: [ slotSearch ]
+  put:
+    is: [ slotSearch, conditionalOperation ]
+  delete:
+    is: [ slotSearch, conditionalOperation ]
+  /_history:
+    type: { fhirHistory: { bundleName: SlotBundle } }
+    is: [ slotSearch ]
+  /{id}:
+    type: fhirResource
+    /_history:
+      type: { fhirHistory: { bundleName: SlotBundle } }
+      /{vid}:
+        type: { fhirVersionedResource: { resourceName: Slot } }
+  /_search:
+    type: { fhirSearch: { bundleName: SlotBundle } }
+    get:
+      is: [ slotSearch ]
+    post:
+      is: [ slotPOSTSearch ]
 

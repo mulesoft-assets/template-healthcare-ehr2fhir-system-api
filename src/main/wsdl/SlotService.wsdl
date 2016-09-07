@@ -1,0 +1,235 @@
+<?xml version="1.0"?>
+
+<wsdl:definitions name="SlotService" targetNamespace="http://example.com/slot-service"
+    xmlns:ms="http://example.com/slot-service" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+
+    <wsdl:types>
+
+        <xsd:schema targetNamespace="http://example.com/slot-service" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+   			<xsd:complexType name="Slots">
+            	<xsd:sequence>
+              	 	<xsd:element minOccurs="0" maxOccurs="unbounded" name="Slot" nillable="true" type="ms:Slot" />
+           	 	</xsd:sequence>
+       		</xsd:complexType>
+
+    		<xsd:complexType name="Slot">
+              	<xsd:all>
+                  	<xsd:element name="id"  type="xsd:string" />
+	               	<xsd:element name="scheduleReference"  type="xsd:string" />
+	               	<xsd:element name="start" type="xsd:dateTime" />
+	               	<xsd:element name="end" type="xsd:dateTime" />
+	               	<xsd:element name="freeBusyType" type="xsd:string" />
+             	</xsd:all>
+        	</xsd:complexType>
+
+
+            <xsd:element name="CreateSlot" type="ms:Slot" />
+            <xsd:element name="CreateSlotResponse">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="id" type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+
+
+            <xsd:element name="GetSlot">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="id"  type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+             <xsd:element name="GetSlotResponse">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="Slot" type="ms:Slot" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+
+
+            <xsd:element name="GetSlots">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="scheduleReference"  type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="GetSlotsResponse" type="ms:Slots" />
+
+
+            <xsd:element name="UpdateSlot" type="ms:Slot" />
+            <xsd:element name="UpdateSlotResponse">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="status" type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="SlotFault">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="errorCode" type="xsd:string" />
+                        <xsd:element name="errorMessage" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+        </xsd:schema>
+    </wsdl:types>
+
+    <wsdl:message name="CreateSlot">
+        <wsdl:part name="body" element="ms:CreateSlot" />
+    </wsdl:message>
+
+    <wsdl:message name="CreateSlotResponse">
+        <wsdl:part name="body" element="ms:CreateSlotResponse" />
+    </wsdl:message>
+
+
+    <wsdl:message name="GetSlot">
+        <wsdl:part name="body" element="ms:GetSlot" />
+    </wsdl:message>
+
+    <wsdl:message name="GetSlotResponse">
+        <wsdl:part name="body" element="ms:GetSlotResponse" />
+    </wsdl:message>
+
+
+    <wsdl:message name="GetSlots">
+    	<wsdl:part name="body" element="ms:GetSlots" />
+    </wsdl:message>
+
+    <wsdl:message name="GetSlotsResponse">
+        <wsdl:part name="body" element="ms:GetSlotsResponse" />
+    </wsdl:message>
+
+
+    <wsdl:message name="UpdateSlot">
+    	<wsdl:part name="body" element="ms:UpdateSlot" />
+    </wsdl:message>
+
+    <wsdl:message name="UpdateSlotResponse">
+        <wsdl:part name="body" element="ms:UpdateSlotResponse" />
+    </wsdl:message>
+
+
+
+    <wsdl:message name="SlotFault">
+        <wsdl:part name="fault" element="ms:SlotFault" />
+    </wsdl:message>
+
+    <!-- wsdl:portType describes messages in an operation -->
+    <wsdl:portType name="SlotServicePortType">
+
+        <wsdl:operation name="CreateSlot">
+            <wsdl:input message="ms:CreateSlot" />
+            <wsdl:output message="ms:CreateSlotResponse" />
+            <wsdl:fault name="SlotFault" message="ms:SlotFault" />
+        </wsdl:operation>
+
+        <wsdl:operation name="GetSlot">
+            <wsdl:input message="ms:GetSlot" />
+            <wsdl:output message="ms:GetSlotResponse" />
+            <wsdl:fault name="SlotFault" message="ms:SlotFault" />
+        </wsdl:operation>
+
+        <wsdl:operation name="GetSlots">
+            <wsdl:input message="ms:GetSlots" />
+            <wsdl:output message="ms:GetSlotsResponse" />
+            <wsdl:fault name="SlotFault" message="ms:SlotFault" />
+        </wsdl:operation>
+
+        <wsdl:operation name="UpdateSlot">
+            <wsdl:input message="ms:UpdateSlot" />
+            <wsdl:output message="ms:UpdateSlotResponse" />
+            <wsdl:fault name="SlotFault" message="ms:SlotFault" />
+        </wsdl:operation>
+
+
+    </wsdl:portType>
+
+    <wsdl:binding name="SlotServiceSoapBinding" type="ms:SlotServicePortType">
+
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+
+        <wsdl:operation name="CreateSlot">
+
+            <soap:operation soapAction="http://example.com/slot-service/create-slot" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/slot-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/slot-service" />
+            </wsdl:output>
+            <wsdl:fault name="SlotFault">
+                <soap:body use="literal" namespace="http://example.com/slot-service" />
+            </wsdl:fault>
+
+        </wsdl:operation>
+
+        <wsdl:operation name="GetSlot">
+
+            <soap:operation soapAction="http://example.com/slot-service/get-slot" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/slot-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/slot-service" />
+            </wsdl:output>
+            <wsdl:fault name="SlotFault">
+                <soap:body use="literal" namespace="http://example.com/slot-service" />
+            </wsdl:fault>
+        </wsdl:operation>
+
+
+        <wsdl:operation name="GetSlots">
+
+            <soap:operation soapAction="http://example.com/slot-service/get-slots" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/slot-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/slot-service" />
+            </wsdl:output>
+            <wsdl:fault name="SlotFault">
+                <soap:body use="literal" namespace="http://example.com/slot-service" />
+            </wsdl:fault>
+        </wsdl:operation>
+
+
+        <wsdl:operation name="UpdateSlot">
+
+            <soap:operation soapAction="http://example.com/slot-service/update-slot" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/slot-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/slot-service" />
+            </wsdl:output>
+            <wsdl:fault name="SlotFault">
+                <soap:body use="literal" namespace="http://example.com/slot-service" />
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="SlotService">
+        <wsdl:documentation></wsdl:documentation>
+
+        <!-- connect it to the binding "EndorsementSearchSoapBinding" above -->
+        <wsdl:port name="SlotServicePort" binding="ms:SlotServiceSoapBinding">
+
+            <!-- give the binding an network address -->
+            <soap:address location="http://slotservice.getsandbox.com/slotService" />
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>

@@ -48,9 +48,9 @@ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variab
 		lastUpdated: now
 	},
 	total: sizeOf payload.ns0#GetConditionsResponse when payload.ns0#GetConditionsResponse is :object otherwise 0,
-	(entry: payload.ns0#GetConditionsResponse.*Condition map 
+	entry: payload.ns0#GetConditionsResponse.*Condition map 
 		{
-			fullUrl: p('baseUri') ++ "Condition/" ++ $.id,
+			fullUrl: p('baseUri') ++ "/Condition/" ++ $.id,
 			resource: {
 				resourceType: "Condition",
 				id: $.id,
@@ -75,7 +75,7 @@ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variab
 					status: "empty"
 				}
 			}
-	}) when payload.ns0#GetConditionsResponse is :object
+	} when payload.ns0#GetConditionsResponse is :object otherwise []
 }]]></dw:set-payload>
         </dw:transform-message>
     </flow>
@@ -109,7 +109,7 @@ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variab
                     <dw:set-property propertyName="Location"><![CDATA[%dw 1.0
 %output application/java
 ---
-p('baseUri') ++ 'Condition/' ++ payload.CreateConditionResponse.id]]></dw:set-property>
+p('baseUri') ++ '/Condition/' ++ payload.CreateConditionResponse.id]]></dw:set-property>
                     <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
 %output application/java
 ---

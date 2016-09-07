@@ -35,6 +35,11 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
             <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
             <set-payload value="{ &quot;message&quot;: &quot;Bad request&quot;, &quot;error&quot;: #[exception.getMessage()]}" doc:name="Bad Request"/>
         </apikit:mapping>
+        <apikit:mapping statusCode="501">
+            <apikit:exception value="org.mule.module.apikit.exception.ApikitRuntimeException"/>
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property"/>
+            <set-payload value="{ &quot;message&quot;: &quot;Not implemented&quot;}" doc:name="Not implemented"/>
+        </apikit:mapping>
     </apikit:mapping-exception-strategy>
 
 </mule>

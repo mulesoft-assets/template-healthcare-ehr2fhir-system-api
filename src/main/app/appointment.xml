@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
+	xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml"
+	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
+	xmlns="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+
+
+<flow name="get:/Appointment:api-config">
+        <dw:transform-message doc:name="Prepare Request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://example.com/appointment-service
+---
+{
+	ns0#GetAppointments: {
+		(patientID: (inboundProperties."http.query.params".patient splitBy '/')[-1] )
+		when inboundProperties."http.query.params".patient != null
+	}
+}]]></dw:set-payload>
+            <dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0
+%output application/java
+---
+inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
+        </dw:transform-message>
+        <ws:consumer config-ref="Appointment" operation="GetAppointments" doc:name="Get Appointments"/>
+        <dw:transform-message doc:name="Transform to FHIR Bundle of Appointments">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 http://example.com/appointment-service
+---
+{
+	resourceType: "Bundle",
+	type: "searchset",
+	link: [{
+		relation: "self",
+		url: flowVars.requestURI
+	}],
+	meta: {
+		lastUpdated: now
+	},
+	total: sizeOf payload.ns0#GetAppointmentsResponse when payload.ns0#GetAppointmentsResponse is :object otherwise 0,
+	entry: payload.ns0#GetAppointmentsResponse.*Appointment map 
+		{
+		fullUrl: p('baseUri') ++ "/Appointment/" ++ $.id,
+		resource: {
+			resourceType: "Appointment",
+			id: $.id,
+			description: $.description,
+			start: $.startTime,
+			end: $.endTime,
+			minutesDuration: $.durationMinutes,
+			participant: [
+				{
+					status: "accepted",
+					actor: {
+						reference: $.patientReference,
+						display: $.patientName
+					}
+				},
+				{
+					status: "accepted",
+					actor: {
+						reference: $.practitionerReference,
+						display: $.practitionerName
+					}
+				}
+			],
+			status: $.status,
+			slot: [
+				{
+					reference: $.slotReference
+				}
+			],
+			text: {
+				div: "",
+				status: "empty"
+			}
+		}
+	} when payload.ns0#GetAppointmentsResponse is :object otherwise []
+}]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+
+
+<flow name="post:/Appointment:application/json:api-config">
+        <dw:transform-message doc:name="prepare request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://example.com/appointment-service
+---
+{
+	ns0#CreateAppointment: {
+		startTime: payload.start as :datetime,
+		endTime: payload.end as :datetime,
+		description: payload.description,
+		durationMinutes: payload.minutesDuration,
+		patientReference: (payload.participant.actor.reference filter ($ startsWith "Patient"))[0] default "",
+		patientName: (payload.participant.actor.display filter ($ startsWith "Patient"))[0] default "",
+		practitionerReference: (payload.participant.actor.reference filter ($ startsWith "Practitioner"))[0] default "",
+		practitionerName: (payload.participant.actor.display filter ($ startsWith "Practitioner"))[0] default "",
+		status: payload.status default "",
+		slotReference: payload.slot[0].reference default ""
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Appointment" operation="CreateAppointment" doc:name="Create Appointment"/>
+
+        <mulexml:dom-to-xml-transformer doc:name="DOM to XML"/>
+        <choice doc:name="Successful?">
+            <when expression="#[dw('payload.AppointmentFault == null')]">
+                <dw:transform-message doc:name="Set Location and http.status property">
+
+                    <dw:set-property propertyName="Location"><![CDATA[%dw 1.0
+%output application/java
+---
+p('baseUri') ++ '/Appointment/' ++ payload.CreateAppointmentResponse.id]]></dw:set-property>
+                    <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+---
+201]]></dw:set-property>
+                </dw:transform-message>
+                <set-payload value="#[NullPayload.getInstance()]" doc:name="NullPayload"/>
+            </when>
+            <otherwise>
+                <dw:transform-message doc:name="Error message">
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	message: payload.AppointmentFault.errorMessage
+}]]></dw:set-payload>
+                    <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+---
+422]]></dw:set-property>
+                </dw:transform-message>
+
+            </otherwise>
+        </choice>
+    </flow>
+
+
+</mule>

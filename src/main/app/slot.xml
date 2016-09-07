@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml"
+	xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
+	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+
+<flow name="post:/Slot:application/json:api-config">
+        <dw:transform-message doc:name="Prepare Create Slot request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://example.com/slot-service
+---
+{
+	ns0#CreateSlot: {
+		scheduleReference: payload.schedule.reference default "",
+		start: payload.start as :datetime default "",
+		end: payload.end as :datetime default "",
+		freeBusyType: payload.freeBusyType default "free"
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Slot" operation="CreateSlot" doc:name="CreateSlot"/>
+        <mulexml:dom-to-xml-transformer doc:name="DOM to XML"/>
+        <choice doc:name="Successful?">
+            <when expression="#[dw('payload.SlotFault == null')]">
+                <dw:transform-message doc:name="Set Location and http.status property">
+
+                    <dw:set-property propertyName="Location"><![CDATA[%dw 1.0
+%output application/java
+---
+p('baseUri') ++ '/Slot/' ++ payload.CreateSlotResponse.id]]></dw:set-property>
+                    <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+---
+201]]></dw:set-property>
+                </dw:transform-message>
+                <set-payload value="#[NullPayload.getInstance()]" doc:name="NullPayload"/>
+            </when>
+            <otherwise>
+                <dw:transform-message doc:name="Error message">
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	message: payload.SlotFault.errorMessage
+}]]></dw:set-payload>
+                    <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+---
+422]]></dw:set-property>
+                </dw:transform-message>
+
+            </otherwise>
+        </choice>
+    </flow>
+    <flow name="put:/Slot/{id}:application/json:api-config">
+        <dw:transform-message doc:name="Prepare Update Slot request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://example.com/slot-service
+---
+{
+	ns0#UpdateSlot: {
+		id: flowVars.id,
+		scheduleReference: payload.schedule.reference default "",
+		start: payload.start as :datetime default "",
+		end: payload.end as :datetime default "",
+		freeBusyType: payload.freeBusyType default "free"
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Slot" operation="UpdateSlot" doc:name="UpdateSlot"/>
+        <mulexml:dom-to-xml-transformer doc:name="DOM to XML"/>
+        <choice doc:name="Successful?">
+            <when expression="#[dw('payload.SlotFault == null')]">
+                <dw:transform-message doc:name="Set http.status property">
+                    <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+---
+payload.UpdateSlotResponse.status]]></dw:set-property>
+                </dw:transform-message>
+                <set-payload value="#[NullPayload.getInstance()]" doc:name="NullPayload"/>
+            </when>
+            <otherwise>
+                <dw:transform-message doc:name="Error message">
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	message: payload.SlotFault.errorMessage
+}]]></dw:set-payload>
+                    <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+---
+payload.SlotFault.errorCode]]></dw:set-property>
+                </dw:transform-message>
+            </otherwise>
+        </choice>
+
+    </flow>
+    <flow name="get:/Slot/{id}:api-config">
+        <dw:transform-message doc:name="Prepare Get Slot Request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://example.com/slot-service
+---
+{
+	ns0#GetSlot: {
+		id: flowVars.id
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Slot" operation="GetSlot" doc:name="Get Slot"/>
+        <dw:transform-message doc:name="Transform to FHIR Slot">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 http://example.com/slot-service
+---
+{
+	message: payload.SlotFault.errorMessage
+} when payload.SlotFault != null otherwise
+
+using (slot = payload.GetSlotResponse.Slot){
+	resourceType: "Slot",
+	id: slot.id,
+	schedule: {
+		reference: slot.scheduleReference
+	},
+	start: slot.start,
+	end: slot.end,
+	freeBusyType: slot.freeBusyType,
+	text: {
+		div: "",
+		status: "empty"
+	}
+}]]></dw:set-payload>
+            <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+---
+404 when payload.SlotFault != null otherwise 200]]></dw:set-property>
+        </dw:transform-message>
+        <logger level="INFO" doc:name="probably not needed"/>
+    </flow>
+    <flow name="get:/Slot:api-config">
+        <dw:transform-message doc:name="Prepare request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://example.com/slot-service
+---
+{
+	ns0#GetSlots: {
+		scheduleReference: inboundProperties."http.query.params".schedule
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Slot" operation="GetSlots" doc:name="Get Slots"/>
+        <dw:transform-message doc:name="Transform to FHIR Bundle of Slots">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 http://example.com/slot-service
+---
+{
+	resourceType: "Bundle",
+	type: "searchset",
+	total: sizeOf payload.ns0#GetSlotsResponse.*Slot 
+			when payload.ns0#GetSlotsResponse is :object otherwise 0,
+	meta: {
+		lastUpdated: now
+	},
+	link: [{
+		relation: "self",
+		url: p('baseUri') ++ "Slot"
+	}],
+	entry: payload.ns0#GetSlotsResponse.*Slot map 
+		{	
+			fullUrl: p('baseUri') ++ "/Slot/" as :string ++ $.id,
+			resource: {
+				resourceType: "Slot",
+				id: $.id,
+				schedule: {
+					reference: $.scheduleReference
+				},
+				start: $.start,
+				end: $.end,
+				freeBusyType: $.freeBusyType,
+				text: {
+					div: "",
+					status: "empty"
+				}
+			}
+	} when payload.ns0#GetSlotsResponse is :object otherwise []
+}]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+
+</mule>

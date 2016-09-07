@@ -17,13 +17,16 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 
 	<context:property-placeholder location="common.properties,mule.${mule.env}.properties"/>
 
-	<http:listener-config name="api-httpListenerConfig" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
+	<http:listener-config name="api-httpListenerConfig" host="0.0.0.0" port="${http.port}" doc:name="HTTP Listener Configuration"/>
     
     <apikit:config name="api-config" raml="healthcare-system-api.raml" consoleEnabled="false" doc:name="Router"/>
     
+    <ws:consumer-config name="AllergyIntolerance" service="AllergyService" port="AllergyServicePort" serviceAddress="http://allergyservice.getsandbox.com/allergyService" wsdlLocation="AllergyIntoleranceService.wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Appointment" service="AppointmentService" port="AppointmentServicePort" serviceAddress="http://appointmentservice.getsandbox.com/appointmentService" wsdlLocation="AppointmentService.wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Condition" service="ConditionService" port="ConditionServicePort" serviceAddress="http://conidtionservice.getsandbox.com/conditionService" wsdlLocation="ConditionService.wsdl" doc:name="Web Service Consumer"/>
     <ws:consumer-config name="Patient" service="PatientService" port="PatientServicePort" serviceAddress="http://patientservice.getsandbox.com/patientService" wsdlLocation="PatientService.wsdl" doc:name="Web Service Consumer"/>
     <ws:consumer-config name="Practitioner" service="PractitionerService" port="PractitionerServicePort" serviceAddress="http://practitionerservice.getsandbox.com/practitionerService" wsdlLocation="PractitionerService.wsdl" doc:name="Web Service Consumer"/>
-    <ws:consumer-config name="Condition" service="ConditionService" port="ConditionServicePort" serviceAddress="http://conidtionservice.getsandbox.com/conditionService" wsdlLocation="ConditionService.wsdl" doc:name="Web Service Consumer"/>
-    <ws:consumer-config name="AllergyIntolerance" service="AllergyService" port="AllergyServicePort" serviceAddress="http://allergyservice.getsandbox.com/allergyService" wsdlLocation="AllergyIntoleranceService.wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Schedule" service="ScheduleService" port="ScheduleServicePort" serviceAddress="http://scheduleservice.getsandbox.com/scheduleService" wsdlLocation="ScheduleService.wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Slot" service="SlotService" port="SlotServicePort" serviceAddress="http://slotservice.getsandbox.com/slotService" wsdlLocation="SlotService.wsdl" doc:name="Web Service Consumer"/>
     
 </mule>

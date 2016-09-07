@@ -42,9 +42,9 @@ inboundProperties."http.request.uri"]]></dw:set-variable>
 		lastUpdated: now
 	},
 	total: sizeOf payload.ns0#GetPatientsResponse when payload.ns0#GetPatientsResponse is :object otherwise 0, 
-	(entry: payload.ns0#GetPatientsResponse.*Patient map 
+	entry: payload.ns0#GetPatientsResponse.*Patient map 
 		{
-			fullUrl: p('baseUri') ++ "Patient/" ++ $.id,
+			fullUrl: p('baseUri') ++ "/Patient/" ++ $.id,
 			resource: {
 				resourceType: "Patient",
 				id: $.id,
@@ -86,7 +86,7 @@ inboundProperties."http.request.uri"]]></dw:set-variable>
 					status: "empty"
 				}
 			}
-		}) when payload.ns0#GetPatientsResponse is :object
+		} when payload.ns0#GetPatientsResponse is :object otherwise []
 	
 }]]></dw:set-payload>
         </dw:transform-message>
@@ -199,7 +199,7 @@ null]]></dw:set-payload>
             <dw:set-property propertyName="Location"><![CDATA[%dw 1.0
 %output application/java
 ---
-p('baseUri') ++ 'Patient/' ++ payload.CreatePatientResponse.id]]></dw:set-property>
+p('baseUri') ++ '/Patient/' ++ payload.CreatePatientResponse.id]]></dw:set-property>
         </dw:transform-message>
     </flow>
     <flow name="put:/Patient/{id}:application/json:api-config">
@@ -280,9 +280,9 @@ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variab
 		lastUpdated: now
 	},
 	total: sizeOf payload.ns0#GetConditionsResponse when payload.ns0#GetConditionsResponse is :object otherwise 0,
-	(entry: payload.ns0#GetConditionsResponse.*Condition map 
+	entry: payload.ns0#GetConditionsResponse.*Condition map 
 		{
-			fullUrl: p('baseUri') ++ "Condition/" ++ $.id,
+			fullUrl: p('baseUri') ++ "/Condition/" ++ $.id,
 			resource: {
 				resourceType: "Condition",
 				id: $.id,
@@ -307,7 +307,7 @@ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variab
 					status: "empty"
 				}
 			}
-	}) when payload.ns0#GetConditionsResponse is :object
+	} when payload.ns0#GetConditionsResponse is :object otherwise []
 	
 }]]></dw:set-payload>
         </dw:transform-message>
@@ -345,9 +345,9 @@ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variab
 		lastUpdated: now
 	},
 	total: sizeOf payload.ns0#GetAllergyIntolerancesResponse when payload.ns0#GetAllergyIntolerancesResponse is :object otherwise 0,
-	(entry: payload.ns0#GetAllergyIntolerancesResponse.*AllergyIntolerance map 
+	entry: payload.ns0#GetAllergyIntolerancesResponse.*AllergyIntolerance map 
 		{
-		fullUrl: p('baseUri') ++ "AllergyIntolerance/" ++ $.id,
+		fullUrl: p('baseUri') ++ "/AllergyIntolerance/" ++ $.id,
 		resource: {
 			resourceType: "AllergyIntolerance",
 			id: $.id,
@@ -371,7 +371,81 @@ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variab
 				status: "empty"
 			}
 		}
-	}) when payload.ns0#GetAllergyIntolerancesResponse is :object
+	} when payload.ns0#GetAllergyIntolerancesResponse is :object otherwise []
+}]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+    <flow name="get:/Patient/{id}/Appointment:api-config">
+        <dw:transform-message doc:name="Prepare Request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://example.com/appointment-service
+---
+{
+	ns0#GetAppointments: {
+		patientID: flowVars.id
+	}
+}]]></dw:set-payload>
+            <dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0
+%output application/java
+---
+inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
+        </dw:transform-message>
+        <ws:consumer config-ref="Appointment" operation="GetAppointments" doc:name="Get Appointments"/>
+        <dw:transform-message doc:name="Transform to FHIR Bundle of Appointments">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 http://example.com/appointment-service
+---
+{
+	resourceType: "Bundle",
+	type: "searchset",
+	link: [{
+		relation: "self",
+		url: flowVars.requestURI
+	}],
+	meta: {
+		lastUpdated: now
+	},
+	total: sizeOf payload.ns0#GetAppointmentsResponse when payload.ns0#GetAppointmentsResponse is :object otherwise 0,
+	entry: payload.ns0#GetAppointmentsResponse.*Appointment map 
+		{
+		fullUrl: p('baseUri') ++ "/Appointment/" ++ $.id,
+		resource: {
+			resourceType: "Appointment",
+			id: $.id,
+			description: $.description,
+			start: $.startTime,
+			end: $.endTime,
+			minutesDuration: $.durationMinutes,
+			participant: [
+				{
+					status: "accepted",
+					actor: {
+						reference: $.patientReference,
+						display: $.patientName
+					}
+				},
+				{
+					status: "accepted",
+					actor: {
+						reference: $.practitionerReference,
+						display: $.practitionerName
+					}
+				}
+			],
+			status: $.status,
+			slot: [
+				{
+					reference: $.slotReference
+				}
+			],
+			text: {
+				div: "",
+				status: "empty"
+			}
+		}
+	} when payload.ns0#GetAppointmentsResponse is :object otherwise []
 }]]></dw:set-payload>
         </dw:transform-message>
     </flow>

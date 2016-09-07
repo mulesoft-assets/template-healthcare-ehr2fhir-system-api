@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
 	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
 	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" 
@@ -8,7 +8,8 @@
 	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
 http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
-http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
 
 <flow name="post:/Practitioner:application/json:api-config">
         <dw:transform-message doc:name="Prepare Create Practitioner request">
@@ -48,7 +49,7 @@ null]]></dw:set-payload>
             <dw:set-property propertyName="Location"><![CDATA[%dw 1.0
 %output application/java
 ---
-p('baseUri') ++ 'Practitioner/' ++ payload.CreatePractitionerResponse.id]]></dw:set-property>
+p('baseUri') ++ '/Practitioner/' ++ payload.CreatePractitionerResponse.id]]></dw:set-property>
         </dw:transform-message>
     </flow>
     <flow name="put:/Practitioner/{id}:application/json:api-config">
@@ -192,9 +193,9 @@ using (practitioner = payload.GetPractitionerResponse.Practitioner){
 		relation: "self",
 		url: p('baseUri') ++ "Practitioner"
 	}],
-	(entry: payload.ns0#GetPractitionersResponse.*Practitioner map 
+	entry: payload.ns0#GetPractitionersResponse.*Practitioner map 
 		{	
-			fullUrl: p('baseUri') ++ "Practitioner/" ++ $.id,
+			fullUrl: p('baseUri') ++ "/Practitioner/" ++ $.id,
 			resource: {
 				resourceType: "Practitioner",
 				id: $.id,
@@ -233,7 +234,67 @@ using (practitioner = payload.GetPractitionerResponse.Practitioner){
 					}) when trim $.email != ""
 				]	
 			}
-	}) when payload.ns0#GetPractitionersResponse is :object
+	} when payload.ns0#GetPractitionersResponse is :object otherwise []
+}]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+    
+    
+    
+    <flow name="get:/Practitioner/{id}/Schedule:api-config">
+        <dw:transform-message doc:name="Prepare Request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://example.com/schedule-service
+---
+{
+	ns0#GetSchedules: {
+		actorReference: "Practitioner/" ++ flowVars.id
+	}
+}]]></dw:set-payload>
+            <dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0
+%output application/java
+---
+inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
+        </dw:transform-message>
+        <ws:consumer config-ref="Schedule" operation="GetSchedules" doc:name="Get Schedules"/>
+        <dw:transform-message doc:name="Transform to FHIR Bundle of Schedules">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 http://example.com/schedule-service
+---
+{
+	resourceType: "Bundle",
+	type: "searchset",
+	link: [{
+		relation: "self",
+		url: flowVars.requestURI
+	}],
+	meta: {
+		lastUpdated: now
+	},
+	total: sizeOf payload.ns0#GetSchedulesResponse when payload.ns0#GetSchedulesResponse is :object otherwise 0,
+	entry: payload.ns0#GetSchedulesResponse.*Schedule map 
+		{
+			fullUrl: p('baseUri') ++ "/Schedule/" ++ $.id,
+			resource: {
+				resourceType: "Schedule",
+				id: $.id,
+				comment: $.comment,
+				planningHorizon: {
+					start: $.startDate,
+					end: $.endDate
+				},
+				actor: {
+					display: $.actorName,
+					reference: $.actorReference
+				},
+				text: {
+					div: "",
+					status: "empty"
+				}
+		}
+	} when payload.ns0#GetSchedulesResponse is :object otherwise []
 }]]></dw:set-payload>
         </dw:transform-message>
     </flow>

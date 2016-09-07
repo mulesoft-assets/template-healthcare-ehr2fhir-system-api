@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
+	xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml"
+	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+
+<flow name="get:/Schedule:api-config">
+        <dw:transform-message doc:name="Prepare Request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://example.com/schedule-service
+---
+{
+	ns0#GetSchedules: {
+		(actorReference: inboundProperties."http.query.params".actor)
+		 when inboundProperties."http.query.params".actor != null
+	}
+}]]></dw:set-payload>
+            <dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0
+%output application/java
+---
+inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
+        </dw:transform-message>
+        <ws:consumer config-ref="Schedule" operation="GetSchedules" doc:name="Get Schedules"/>
+        <dw:transform-message doc:name="Transform to FHIR Bundle of Schedules">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 http://example.com/schedule-service
+---
+{
+	resourceType: "Bundle",
+	type: "searchset",
+	link: [{
+		relation: "self",
+		url: flowVars.requestURI
+	}],
+	meta: {
+		lastUpdated: now
+	},
+	total: sizeOf payload.ns0#GetSchedulesResponse when payload.ns0#GetSchedulesResponse is :object otherwise 0,
+	entry: payload.ns0#GetSchedulesResponse.*Schedule map 
+		{
+			fullUrl: p('baseUri') ++ "/Schedule/" ++ $.id,
+			resource: {
+				resourceType: "Schedule",
+				id: $.id,
+				comment: $.comment,
+				(planningHorizon: {
+					start: $.startDate,
+					end: $.endDate
+				}) when $.startDate != null,
+				actor: {
+					display: $.actorName,
+					reference: $.actorReference
+				},
+				text: {
+					div: "",
+					status: "empty"
+				}
+		}
+	} when payload.ns0#GetSchedulesResponse is :object otherwise []
+}]]></dw:set-payload>
+        </dw:transform-message>
+    </flow>
+
+
+<flow name="post:/Schedule:application/json:api-config">
+        <dw:transform-message doc:name="prepare request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://example.com/schedule-service
+---
+{
+	ns0#CreateSchedule: {
+		startDate: payload.planningHorizon.start as :datetime when payload.planningHorizon.start != null otherwise "",
+		endDate: payload.planningHorizon.end as :datetime when payload.planningHorizon.end != null otherwise "",
+		comment: payload.comment default "",
+		actorName: payload.actor.display default "",
+		actorReference: payload.actor.reference default ""
+	}
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <ws:consumer config-ref="Schedule" operation="CreateSchedule" doc:name="Create Schedule"/>
+
+        <mulexml:dom-to-xml-transformer doc:name="DOM to XML"/>
+        <choice doc:name="Successful?">
+            <when expression="#[dw('payload.ScheduleFault == null')]">
+                <dw:transform-message doc:name="Set Location and http.status property">
+
+                    <dw:set-property propertyName="Location"><![CDATA[%dw 1.0
+%output application/java
+---
+p('baseUri') ++ '/Schedule/' ++ payload.CreateScheduleResponse.id]]></dw:set-property>
+                    <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+---
+201]]></dw:set-property>
+                </dw:transform-message>
+                <set-payload value="#[NullPayload.getInstance()]" doc:name="NullPayload"/>
+            </when>
+            <otherwise>
+                <dw:transform-message doc:name="Error message">
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	message: payload.ScheduleFault.errorMessage
+}]]></dw:set-payload>
+                    <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+---
+422]]></dw:set-property>
+                </dw:transform-message>
+
+            </otherwise>
+        </choice>
+    </flow>
+
+
+</mule>
