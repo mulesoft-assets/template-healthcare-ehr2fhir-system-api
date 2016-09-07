@@ -23,6 +23,7 @@
         required: false
         description: Manifestation/symptom
       identifier:
+        type: string|integer
         required: false
         description: A unique identifier of the condition record
       onset:
