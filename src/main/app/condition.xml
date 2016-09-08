@@ -29,7 +29,7 @@ http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/
             <dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0
 %output application/java
 ---
-inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
+"http://" ++ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
         </dw:transform-message>
         <ws:consumer config-ref="Condition" operation="GetConditions" doc:name="Get Conditions"/>
         <dw:transform-message doc:name="Transform to FHIR Bundle of Conditions">

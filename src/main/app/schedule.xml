@@ -27,7 +27,7 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
             <dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0
 %output application/java
 ---
-inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
+"http://" ++ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
         </dw:transform-message>
         <ws:consumer config-ref="Schedule" operation="GetSchedules" doc:name="Get Schedules"/>
         <dw:transform-message doc:name="Transform to FHIR Bundle of Schedules">

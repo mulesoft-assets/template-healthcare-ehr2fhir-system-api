@@ -23,7 +23,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
             <dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0
 %output application/java
 ---
-inboundProperties."http.request.uri"]]></dw:set-variable>
+"http://" ++ inboundProperties."http.request.uri"]]></dw:set-variable>
         </dw:transform-message>
         <ws:consumer config-ref="Patient" operation="GetPatients" doc:name="Get Patients"/>
         <dw:transform-message doc:name="Transform to FHIR Bundle of Patients">
@@ -253,7 +253,7 @@ payload.UpdatePatientResponse.status]]></dw:set-property>
             <dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0
 %output application/java
 ---
-inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
+"http://" ++ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
         </dw:transform-message>
         <ws:consumer config-ref="Condition" operation="GetConditions" doc:name="Get Conditions"/>
         <dw:transform-message doc:name="Transform to FHIR Bundle of Conditions">
@@ -314,7 +314,7 @@ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variab
             <dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0
 %output application/java
 ---
-inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
+"http://" ++ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
         </dw:transform-message>
         <ws:consumer config-ref="AllergyIntolerance" operation="GetAllergyIntolerances" doc:name="Get AllergyIntolerances"/>
         <dw:transform-message doc:name="Transform to FHIR Bundle of AllergyIntolerances">
@@ -373,7 +373,7 @@ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variab
             <dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0
 %output application/java
 ---
-inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
+"http://" ++ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
         </dw:transform-message>
         <ws:consumer config-ref="Appointment" operation="GetAppointments" doc:name="Get Appointments"/>
         <dw:transform-message doc:name="Transform to FHIR Bundle of Appointments">

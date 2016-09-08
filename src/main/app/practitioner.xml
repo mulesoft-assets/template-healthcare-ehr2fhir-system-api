@@ -170,6 +170,10 @@ using (practitioner = payload.GetPractitionerResponse.Practitioner){
 	ns0#GetPractitioners: {
 	}
 }]]></dw:set-payload>
+		<dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0
+%output application/java
+---
+"http://" ++ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
         </dw:transform-message>
         <ws:consumer config-ref="Practitioner" operation="GetPractitioners" doc:name="Get Practitioners"/>
         <dw:transform-message doc:name="Transform to FHIR Bundle of Practitioners">
@@ -187,7 +191,7 @@ using (practitioner = payload.GetPractitionerResponse.Practitioner){
 	},
 	link: [{
 		relation: "self",
-		url: p('baseUri') ++ "Practitioner"
+		url: flowVars.requestURI
 	}],
 	entry: payload.ns0#GetPractitionersResponse.*Practitioner map 
 		{	

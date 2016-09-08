@@ -161,6 +161,10 @@ using (slot = payload.GetSlotResponse.Slot){
 		scheduleReference: inboundProperties."http.query.params".schedule
 	}
 }]]></dw:set-payload>
+			<dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0
+%output application/java
+---
+"http://" ++ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
         </dw:transform-message>
         <ws:consumer config-ref="Slot" operation="GetSlots" doc:name="Get Slots"/>
         <dw:transform-message doc:name="Transform to FHIR Bundle of Slots">
@@ -178,7 +182,7 @@ using (slot = payload.GetSlotResponse.Slot){
 	},
 	link: [{
 		relation: "self",
-		url: p('baseUri') ++ "Slot"
+		url: flowVars.requestURI
 	}],
 	entry: payload.ns0#GetSlotsResponse.*Slot map 
 		{	
