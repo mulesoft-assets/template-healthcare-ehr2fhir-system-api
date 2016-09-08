@@ -69,11 +69,7 @@ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variab
 					}]
 				},
 				verificationStatus: $.verificationStatus,
-				onsetDateTime: $.onsetDateTime,
-				text: {
-					div: "",
-					status: "empty"
-				}
+				onsetDateTime: $.onsetDateTime
 			}
 	} when payload.ns0#GetConditionsResponse is :object otherwise []
 }]]></dw:set-payload>

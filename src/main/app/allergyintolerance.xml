@@ -70,11 +70,7 @@ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variab
 			},
 			recordedDate: $.recordedDate,
 			criticality: $.criticality,
-			type: $.type,
-			text: {
-				div: "",
-				status: "empty"
-			}
+			type: $.type
 		}
 	} when payload.ns0#GetAllergyIntolerancesResponse is :object otherwise []
 }]]></dw:set-payload>

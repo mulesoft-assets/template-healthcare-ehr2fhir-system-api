@@ -80,11 +80,7 @@ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variab
 				{
 					reference: $.slotReference
 				}
-			],
-			text: {
-				div: "",
-				status: "empty"
-			}
+			]
 		}
 	} when payload.ns0#GetAppointmentsResponse is :object otherwise []
 }]]></dw:set-payload>

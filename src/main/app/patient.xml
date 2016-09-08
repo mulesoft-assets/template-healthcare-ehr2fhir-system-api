@@ -80,11 +80,7 @@ inboundProperties."http.request.uri"]]></dw:set-variable>
 					system: "phone",
 					use: $.telecom1Use,
 					value: $.telecom1Value
-				}],
-				text: {
-					div: "",
-					status: "empty"
-				}
+				}]
 			}
 		} when payload.ns0#GetPatientsResponse is :object otherwise []
 	
@@ -149,11 +145,7 @@ using (patient = payload.ns0#GetPatientResponse.Patient){
 		system: "phone",
 		use: patient.telecom1Use,
 		value: patient.telecom1Value
-	}],
-	text: {
-		div: "",
-		status: "empty"
-	}
+	}]
 }]]></dw:set-payload>
             <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
 %output application/java
@@ -301,11 +293,7 @@ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variab
 					}]
 				},
 				verificationStatus: $.verificationStatus,
-				onsetDateTime: $.onsetDateTime,
-				text: {
-					div: "",
-					status: "empty"
-				}
+				onsetDateTime: $.onsetDateTime
 			}
 	} when payload.ns0#GetConditionsResponse is :object otherwise []
 	
@@ -365,11 +353,7 @@ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variab
 			},
 			recordedDate: $.recordedDate,
 			criticality: $.criticality,
-			type: $.type,
-			text: {
-				div: "",
-				status: "empty"
-			}
+			type: $.type
 		}
 	} when payload.ns0#GetAllergyIntolerancesResponse is :object otherwise []
 }]]></dw:set-payload>
@@ -439,11 +423,7 @@ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variab
 				{
 					reference: $.slotReference
 				}
-			],
-			text: {
-				div: "",
-				status: "empty"
-			}
+			]
 		}
 	} when payload.ns0#GetAppointmentsResponse is :object otherwise []
 }]]></dw:set-payload>

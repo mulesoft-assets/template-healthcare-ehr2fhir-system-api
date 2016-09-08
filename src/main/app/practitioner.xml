@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
+<mule xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
 	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
 	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" 
@@ -94,7 +94,7 @@ null ]]></dw:set-payload>
 payload.UpdatePractitionerResponse.status]]></dw:set-property>
         </dw:transform-message>
     </flow>
-    <flow name="get:/Practitioner/{id}:application/json:api-config">
+    <flow name="get:/Practitioner/{id}:api-config">
         <dw:transform-message doc:name="Prepare Get Practitioner Request">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/xml
@@ -152,11 +152,7 @@ using (practitioner = payload.GetPractitionerResponse.Practitioner){
 			use: practitioner.emailUse,
 			value: practitioner.email
 		}) when trim practitioner.email != ""
-	],
-	text: {
-		div: "",
-		status: "empty"
-	}
+	]
 }]]></dw:set-payload>
             <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
 %output application/java
@@ -164,7 +160,7 @@ using (practitioner = payload.GetPractitionerResponse.Practitioner){
 404 when payload.PractitionerFault != null otherwise 200]]></dw:set-property>
         </dw:transform-message>
     </flow>
-    <flow name="get:/Practitioner:application/json:api-config">
+    <flow name="get:/Practitioner:api-config">
         <dw:transform-message doc:name="Prepare request">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/xml
@@ -288,10 +284,6 @@ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variab
 				actor: {
 					display: $.actorName,
 					reference: $.actorReference
-				},
-				text: {
-					div: "",
-					status: "empty"
 				}
 		}
 	} when payload.ns0#GetSchedulesResponse is :object otherwise []

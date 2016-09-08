@@ -191,11 +191,7 @@ using (slot = payload.GetSlotResponse.Slot){
 				},
 				start: $.start,
 				end: $.end,
-				freeBusyType: $.freeBusyType,
-				text: {
-					div: "",
-					status: "empty"
-				}
+				freeBusyType: $.freeBusyType
 			}
 	} when payload.ns0#GetSlotsResponse is :object otherwise []
 }]]></dw:set-payload>

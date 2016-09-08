@@ -60,10 +60,6 @@ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variab
 				actor: {
 					display: $.actorName,
 					reference: $.actorReference
-				},
-				text: {
-					div: "",
-					status: "empty"
 				}
 		}
 	} when payload.ns0#GetSchedulesResponse is :object otherwise []
