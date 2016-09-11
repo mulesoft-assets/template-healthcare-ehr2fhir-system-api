@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" 
+<mule xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" 
 	xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml"
 	xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
 	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
@@ -25,7 +25,9 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 {
 	ns0#GetAllergyIntolerances: {
 		(patientID: (inboundProperties."http.query.params".patient splitBy '/')[-1] )
-		when inboundProperties."http.query.params".patient != null
+		when inboundProperties."http.query.params".patient != null,
+		(substanceText: (inboundProperties."http.query.params".substance splitBy '/')[-1] )
+		when inboundProperties."http.query.params".substance != null
 	}
 }]]></dw:set-payload>
             <dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0
@@ -70,6 +72,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 			},
 			recordedDate: $.recordedDate,
 			criticality: $.criticality,
+			status: $.status,
 			type: $.type
 		}
 	} when payload.ns0#GetAllergyIntolerancesResponse is :object otherwise []
@@ -92,7 +95,8 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 		substanceCode: payload.substance.coding[0].code default "",
 		substanceText: payload.substance.coding[0].display default "",
 		criticality: payload.criticality default "",
-		type: payload.type default ""
+		type: payload.type default "",
+		status: payload.status default "unconfirmed"
 	}
 }]]></dw:set-payload>
         </dw:transform-message>
@@ -146,7 +150,8 @@ p('baseUri') ++ '/AllergyIntolerance/' ++ payload.CreateAllergyIntoleranceRespon
 		substanceCode: payload.substance.coding[0].code default "",
 		substanceText: payload.substance.coding[0].display default "",
 		criticality: payload.criticality default "",
-		type: payload.type default ""
+		type: payload.type default "",
+		status: payload.status default "unconfirmed"
 	}
 }]]></dw:set-payload>
         </dw:transform-message>

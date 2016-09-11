@@ -24,6 +24,7 @@
 	                <xsd:element name="substanceText" type="xsd:string" />
 	                <xsd:element name="criticality" type="xsd:string" />
 	                <xsd:element name="type" type="xsd:string" />
+	                <xsd:element name="status" type="xsd:string" />
                </xsd:all>
             </xsd:complexType>
             

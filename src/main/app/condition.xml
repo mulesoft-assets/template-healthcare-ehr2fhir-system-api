@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml"  
+<mule xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml"  
 	xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" 
 	xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
 	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
@@ -23,7 +23,9 @@ http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/
 ---
 {
 	ns0#GetConditions: {
-		patientID: (inboundProperties."http.query.params".patient splitBy '/')[-1]
+		patientID: (inboundProperties."http.query.params".patient splitBy '/')[-1],
+		(conditionCode: inboundProperties."http.query.params".code)
+			when inboundProperties."http.query.params".code != null
 	}
 }]]></dw:set-payload>
             <dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0

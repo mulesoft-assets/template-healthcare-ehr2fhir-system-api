@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
+<mule xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
 	xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml"
 	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
 	xmlns="http://www.mulesoft.org/schema/mule/core" 
@@ -24,7 +24,10 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
 {
 	ns0#GetAppointments: {
 		(patientID: (inboundProperties."http.query.params".patient splitBy '/')[-1] )
-		when inboundProperties."http.query.params".patient != null
+			when inboundProperties."http.query.params".patient != null,
+		(practitionerID: (inboundProperties."http.query.params".practitioner splitBy '/')[-1] )
+			when inboundProperties."http.query.params".practitioner != null
+		
 	}
 }]]></dw:set-payload>
             <dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0
@@ -96,15 +99,15 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
 ---
 {
 	ns0#CreateAppointment: {
-		startTime: payload.start as :datetime,
-		endTime: payload.end as :datetime,
-		description: payload.description,
-		durationMinutes: payload.minutesDuration,
+		startTime: payload.start,
+		endTime: payload.end,
+		description: payload.description default "",
+		durationMinutes: payload.minutesDuration default "",
 		patientReference: (payload.participant.actor.reference filter ($ startsWith "Patient"))[0] default "",
-		patientName: (payload.participant.actor.display filter ($ startsWith "Patient"))[0] default "",
+		patientName: (payload.participant filter ($.actor.reference startsWith "Patient"))[0].actor.display default "",
 		practitionerReference: (payload.participant.actor.reference filter ($ startsWith "Practitioner"))[0] default "",
-		practitionerName: (payload.participant.actor.display filter ($ startsWith "Practitioner"))[0] default "",
-		status: payload.status default "",
+		practitionerName: (payload.participant filter ($.actor.reference startsWith "Practitioner"))[0].actor.display default "",
+		status: payload.status default "free",
 		slotReference: payload.slot[0].reference default ""
 	}
 }]]></dw:set-payload>

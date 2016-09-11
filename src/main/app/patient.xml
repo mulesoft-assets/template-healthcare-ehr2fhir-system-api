@@ -225,15 +225,13 @@ p('baseUri') ++ '/Patient/' ++ payload.CreatePatientResponse.id]]></dw:set-prope
         </dw:transform-message>
         <ws:consumer config-ref="Patient" operation="UpdatePatient" doc:name="Update Patient"/>
         <dw:transform-message doc:name="Set HTTP status">
-            <dw:set-payload><![CDATA[%dw 1.0
-%output application/java
----
-null]]></dw:set-payload>
+
             <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
 %output application/java
 ---
 payload.UpdatePatientResponse.status]]></dw:set-property>
         </dw:transform-message>
+        <set-payload value="#[NullPayload.getInstance()]" doc:name="NullPayload"/>
 
 
     </flow>
