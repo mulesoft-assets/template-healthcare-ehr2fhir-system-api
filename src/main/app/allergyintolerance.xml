@@ -24,10 +24,10 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 ---
 {
 	ns0#GetAllergyIntolerances: {
-		(patientID: (inboundProperties."http.query.params".patient splitBy '/')[-1] )
-		when inboundProperties."http.query.params".patient != null,
-		(substanceText: (inboundProperties."http.query.params".substance splitBy '/')[-1] )
-		when inboundProperties."http.query.params".substance != null
+		(patientID: (inboundProperties."http.query.params".patient splitBy '/')[-1])
+			when inboundProperties."http.query.params".patient != null,
+		(substanceText: inboundProperties."http.query.params".substance)
+			when inboundProperties."http.query.params".substance != null
 	}
 }]]></dw:set-payload>
             <dw:set-variable variableName="requestURI"><![CDATA[%dw 1.0

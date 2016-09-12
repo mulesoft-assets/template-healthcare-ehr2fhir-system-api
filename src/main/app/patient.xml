@@ -351,6 +351,7 @@ payload.UpdatePatientResponse.status]]></dw:set-property>
 			},
 			recordedDate: $.recordedDate,
 			criticality: $.criticality,
+			status: $.status,
 			type: $.type
 		}
 	} when payload.ns0#GetAllergyIntolerancesResponse is :object otherwise []
