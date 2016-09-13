@@ -66,14 +66,14 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 			},
 			substance: {
 				coding: [{
-					code: $.substanceCode,
+					(code: $.substanceCode) when $.substanceCode != null and $.substanceCode != "",
 					display: $.substanceText
 				}]
 			},
 			recordedDate: $.recordedDate,
-			criticality: $.criticality,
-			status: $.status,
-			type: $.type
+			(criticality: $.criticality) when $.criticality != null and $.criticality != "",
+			(status: $.status) when $.status != null and $.status != "",
+			(type: $.type) when $.type != null and $.type != ""
 		}
 	} when payload.ns0#GetAllergyIntolerancesResponse is :object otherwise []
 }]]></dw:set-payload>

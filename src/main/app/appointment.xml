@@ -61,7 +61,7 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
 			description: $.description,
 			start: $.startTime,
 			end: $.endTime,
-			minutesDuration: $.durationMinutes,
+			(minutesDuration: $.durationMinutes) when $.durationMinutes != null and $.durationMinutes != "",
 			participant: [
 				{
 					status: "accepted",

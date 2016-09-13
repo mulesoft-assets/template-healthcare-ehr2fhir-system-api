@@ -333,7 +333,7 @@ payload.UpdatePatientResponse.status]]></dw:set-property>
 	total: sizeOf payload.ns0#GetAllergyIntolerancesResponse when payload.ns0#GetAllergyIntolerancesResponse is :object otherwise 0,
 	entry: payload.ns0#GetAllergyIntolerancesResponse.*AllergyIntolerance map 
 		{
-		fullUrl: p('baseUri') ++ "/AllergyIntolerance/" ++ $.id,
+		fullUrl: p('baseUri') ++ "AllergyIntolerance/" ++ $.id,
 		resource: {
 			resourceType: "AllergyIntolerance",
 			id: $.id,
@@ -345,14 +345,14 @@ payload.UpdatePatientResponse.status]]></dw:set-property>
 			},
 			substance: {
 				coding: [{
-					code: $.substanceCode,
+					(code: $.substanceCode) when $.substanceCode != null and $.substanceCode != "",
 					display: $.substanceText
 				}]
 			},
 			recordedDate: $.recordedDate,
-			criticality: $.criticality,
-			status: $.status,
-			type: $.type
+			(criticality: $.criticality) when $.criticality != null and $.criticality != "",
+			(status: $.status) when $.status != null and $.status != "",
+			(type: $.type) when $.type != null and $.type != ""
 		}
 	} when payload.ns0#GetAllergyIntolerancesResponse is :object otherwise []
 }]]></dw:set-payload>
