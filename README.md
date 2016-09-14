@@ -39,10 +39,14 @@ The following FHIR objects and operations are implemented in this API:
  + **Slot** - search, update, create
 
 
+
+
 # Considerations <a name="considerations"/>
 
 To run this Anypoint Template, there are certain preconditions that must be considered. **Failling to do so could lead to unexpected behavior of the template.**
 Use Anypoint Studio v6.1.0+ and Mule ESB 3.8.1+ to run this template.
+This template uses SOAP services defined by WSDL files located at src/main/wsdl folder.
+
 
 ### Running the application
 
@@ -95,7 +99,7 @@ In order to use this Mule Anypoint Template you need to configure properties (AP
 ### Application properties
 + http.port `8081`
 
-+ baseUri ``
++ baseUri `http://localhost:8081/api`
 
 + allergyintolerance.service `AllergyService`
 + allergyintolerance.port `AllergyServicePort`
