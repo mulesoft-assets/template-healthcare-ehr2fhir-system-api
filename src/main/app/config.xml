@@ -21,12 +21,12 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
     
     <apikit:config name="api-config" raml="healthcare-system-api.raml" consoleEnabled="false" doc:name="Router"/>
     
-    <ws:consumer-config name="AllergyIntolerance" service="AllergyService" port="AllergyServicePort" serviceAddress="http://allergyservice.getsandbox.com/allergyService" wsdlLocation="AllergyIntoleranceService.wsdl" doc:name="Web Service Consumer"/>
-    <ws:consumer-config name="Appointment" service="AppointmentService" port="AppointmentServicePort" serviceAddress="http://appointmentservice.getsandbox.com/appointmentService" wsdlLocation="AppointmentService.wsdl" doc:name="Web Service Consumer"/>
-    <ws:consumer-config name="Condition" service="ConditionService" port="ConditionServicePort" serviceAddress="http://conidtionservice.getsandbox.com/conditionService" wsdlLocation="ConditionService.wsdl" doc:name="Web Service Consumer"/>
-    <ws:consumer-config name="Patient" service="PatientService" port="PatientServicePort" serviceAddress="http://patientservice.getsandbox.com/patientService" wsdlLocation="PatientService.wsdl" doc:name="Web Service Consumer"/>
-    <ws:consumer-config name="Practitioner" service="PractitionerService" port="PractitionerServicePort" serviceAddress="http://practitionerservice.getsandbox.com/practitionerService" wsdlLocation="PractitionerService.wsdl" doc:name="Web Service Consumer"/>
-    <ws:consumer-config name="Schedule" service="ScheduleService" port="ScheduleServicePort" serviceAddress="http://scheduleservice.getsandbox.com/scheduleService" wsdlLocation="ScheduleService.wsdl" doc:name="Web Service Consumer"/>
-    <ws:consumer-config name="Slot" service="SlotService" port="SlotServicePort" serviceAddress="http://slotservice.getsandbox.com/slotService" wsdlLocation="SlotService.wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="AllergyIntolerance" service="${allergyintolerance.service}" port="${allergyintolerance.port}" serviceAddress="${allergyintolerance.address}" wsdlLocation="AllergyIntoleranceService.wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Appointment" service="${appointment.service}" port="${appointment.port}" serviceAddress="${appointment.address}" wsdlLocation="AppointmentService.wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Condition" service="${condition.service}" port="${condition.port}" serviceAddress="${condition.address}" wsdlLocation="ConditionService.wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Patient" service="${patient.service}" port="${patient.port}" serviceAddress="${patient.address}" wsdlLocation="PatientService.wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Practitioner" service="${practitioner.service}" port="${practitioner.port}" serviceAddress="${practitioner.address}" wsdlLocation="PractitionerService.wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Schedule" service="${schedule.service}" port="${schedule.port}" serviceAddress="${schedule.address}" wsdlLocation="ScheduleService.wsdl" doc:name="Web Service Consumer"/>
+    <ws:consumer-config name="Slot" service="${slot.service}" port="${slot.port}" serviceAddress="${slot.address}" wsdlLocation="SlotService.wsdl" doc:name="Web Service Consumer"/>
     
 </mule>
