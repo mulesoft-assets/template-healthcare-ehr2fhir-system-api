@@ -1,7 +1,6 @@
 #%RAML 1.0
 title: Healthcare FHIR System API
 version: v1
-baseUri: http://portal-ehr2fhir-system-api.cloudhub.io/api
 mediaType: [application/xml+fhir, application/json+fhir]
 
 types:
@@ -201,37 +200,6 @@ traits:
 
 ### API definition ###
 
-#/:
-#  get:
-#    is: [{search: { bundleName: GeneralBundle}}]
-#    queryParameters:
-#      _format:
-#        required: false
-#        enum: [application/json, application/xml]
-#      
-#  options:
-#    is: [conformance]
-#    queryParameters:
-#      _format:
-#        required: false
-#        enum: [application/json, application/xml]
-#
-#  /_history:
-#    type: { fhirHistory : { bundleName: GeneralBundle } }
-#
-#/metadata:
-#  get:
-#    is: [conformance]
-#    queryParameters:
-#    responses:
-#      200:
-#        headers:
-#          ETag:
-#            example: condition
-#        body:
-#          application/json:
-#            type: Conformance
-
 /AllergyIntolerance:
   type: fhirResourceType
   get:
@@ -304,126 +272,6 @@ traits:
       is: [ conditionSearch ]
     post:
       is: [ conditionPOSTSearch ]
-
-#/Device:
-#  type: fhirResourceType
-#  get:
-#    is: [ deviceSearch ]
-#  put:
-#    is: [ deviceSearch, conditionalOperation ]
-#  delete:
-#    is: [ deviceSearch, conditionalOperation ]
-#  /_history:
-#    type: { fhirHistory: { bundleName: DeviceBundle } }
-#    is: [ deviceSearch ]
-#  /{id}:
-#    type: fhirResource
-#    /_history:
-#      type: { fhirHistory: { bundleName: DeviceBundle } }
-#      /{vid}:
-#        type: { fhirVersionedResource: { resourceName: Device } }
-#  /_search:
-#    type: { fhirSearch: { bundleName: DeviceBundle } }
-#    get:
-#      is: [ deviceSearch ]
-#    post:
-#      is: [ devicePOSTSearch ]
-#
-#/Encounter:
-#  type: fhirResourceType
-#  get:
-#    is: [ encounterSearch ]
-#  put:
-#    is: [ encounterSearch, conditionalOperation ]
-#  delete:
-#    is: [ encounterSearch, conditionalOperation ]
-#  /_history:
-#    type: { fhirHistory: { bundleName: EncounterBundle } }
-#    is: [ encounterSearch ]
-#  /{id}:
-#    type: fhirResource
-#    /_history:
-#      type: { fhirHistory: { bundleName: EncounterBundle } }
-#      /{vid}:
-#        type: { fhirVersionedResource: { resourceName: Encounter } }
-#  /_search:
-#    type: { fhirSearch: { bundleName: EncounterBundle } }
-#    get:
-#      is: [ encounterSearch ]
-#    post:
-#      is: [ encounterPOSTSearch ]
-#
-#/Medication:
-#  type: fhirResourceType
-#  get:
-#    is: [ medicationSearch ]
-#  put:
-#    is: [ medicationSearch, conditionalOperation ]
-#  delete:
-#    is: [ medicationSearch, conditionalOperation ]
-#  /_history:
-#    type: { fhirHistory: { bundleName: MedicationBundle } }
-#    is: [ medicationSearch ]
-#  /{id}:
-#    type: fhirResource
-#    /_history:
-#      type: { fhirHistory: { bundleName: MedicationBundle } }
-#      /{vid}:
-#        type: { fhirVersionedResource: { resourceName: Medication } }
-#  /_search:
-#    type: { fhirSearch: { bundleName: MedicationBundle } }
-#    get:
-#      is: [ medicationSearch ]
-#    post:
-#      is: [ medicationPOSTSearch ]
-#
-#/MedicationOrder:
-#  type: fhirResourceType
-#  get:
-#    is: [ medicationOrderSearch ]
-#  put:
-#    is: [ medicationOrderSearch, conditionalOperation ]
-#  delete:
-#    is: [ medicationOrderSearch, conditionalOperation ]
-#  /_history:
-#    type: { fhirHistory: { bundleName: MedicationOrderBundle } }
-#    is: [ medicationOrderSearch ]
-#  /{id}:
-#    type: fhirResource
-#    /_history:
-#      type: { fhirHistory: { bundleName: MedicationOrderBundle } }
-#      /{vid}:
-#        type: { fhirVersionedResource: { resourceName: MedicationOrder } }
-#  /_search:
-#    type: { fhirSearch: { bundleName: MedicationOrderBundle } }
-#    get:
-#      is: [ medicationOrderSearch ]
-#    post:
-#      is: [ medicationOrderPOSTSearch ]
-#
-#/Observation:
-#  type: fhirResourceType
-#  get:
-#    is: [ observationSearch ]
-#  put:
-#    is: [ observationSearch, conditionalOperation ]
-#  delete:
-#    is: [ observationSearch, conditionalOperation ]
-#  /_history:
-#    type: { fhirHistory: { bundleName: ObservationBundle } }
-#    is: [ observationSearch ]
-#  /{id}:
-#    type: fhirResource
-#    /_history:
-#      type: { fhirHistory: { bundleName: ObservationBundle } }
-#      /{vid}:
-#        type: { fhirVersionedResource: { resourceName: Observation } }
-#  /_search:
-#    type: { fhirSearch: { bundleName: ObservationBundle } }
-#    get:
-#      is: [ observationSearch ]
-#    post:
-#      is: [ observationPOSTSearch ]
 
 /Patient:
   type: fhirResourceType
