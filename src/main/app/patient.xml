@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
+<mule xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" 
+	xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" 
+	xmlns:ws="http://www.mulesoft.org/schema/mule/ws"
 	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns="http://www.mulesoft.org/schema/mule/core" 
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
@@ -88,7 +91,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
         </dw:transform-message>
     </flow>
     <flow name="get:/Patient/{id}:api-config">
-        <dw:transform-message doc:name="prepare Get Patient Request">
+        <dw:transform-message doc:name="Prepare Get Patient Request">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/xml
 %namespace ns0 http://example.com/patient-service
@@ -155,7 +158,7 @@ using (patient = payload.ns0#GetPatientResponse.Patient){
     </flow>
 
 <flow name="post:/Patient:application/json:api-config">
-        <dw:transform-message doc:name="prepare Request">
+        <dw:transform-message doc:name="Prepare Request">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/xml
 %namespace ns0 http://example.com/patient-service
@@ -195,7 +198,7 @@ p('baseUri') ++ '/Patient/' ++ payload.CreatePatientResponse.id]]></dw:set-prope
         </dw:transform-message>
     </flow>
     <flow name="put:/Patient/{id}:application/json:api-config">
-        <dw:transform-message doc:name="prepare Update Patient request">
+        <dw:transform-message doc:name="Prepare Update Patient request">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/xml
 %namespace ns0 http://example.com/patient-service
