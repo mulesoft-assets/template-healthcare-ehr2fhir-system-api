@@ -25,7 +25,8 @@ This include creation, modification and retrieval of medical data from an EHR sy
 
 EHR System API is part of the Healthcare Templates Solution and uses the standardized FHIR structures [version 1.0.2 DSTU2](https://www.hl7.org/FHIR/DSTU2/index.html).
 
-The API leverages RAML 1.0 to provide type information for validation of requests and to help with the data transformation during development by providing useful metadata.
+The API is defined using [RAML 1.0](http://raml.org/) to provide type information for validation of requests and to help with the data transformation during development by providing useful metadata.
+
 
 The following FHIR objects and operations are implemented in this API:
 
@@ -38,10 +39,10 @@ The following FHIR objects and operations are implemented in this API:
  + **Slot** - search, update, create
 
 
-
 # Considerations <a name="considerations"/>
 
 To run this Anypoint Template, there are certain preconditions that must be considered. **Failling to do so could lead to unexpected behavior of the template.**
+Use Anypoint Studio v6.1.0+ and Mule ESB 3.8.1+ to run this template.
 
 ### Running the application
 
