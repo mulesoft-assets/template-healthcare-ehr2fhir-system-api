@@ -3,4 +3,9 @@
 #This file is located at resourceTypes/fhirCompartment.raml
 
 get:
-  is: [{search: { bundleName: <<resourcePathName>>Bundle}}]
+  is: [search]
+  responses:
+    200:
+      body:
+        application/json:
+          type: <<resourcePathName>>Bundle

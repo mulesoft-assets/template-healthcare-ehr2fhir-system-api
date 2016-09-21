@@ -15,4 +15,10 @@ post:
           type: <<bundleName>>
 get:
   description: This interaction searches a set of resources based on some filter criteria.
-  is: [{search: { bundleName: <<bundleName>>}}]
+#  is: [{search: { bundleName: <<bundleName>>}}]
+#  is: [search]
+  responses:
+    200:
+      body:
+        application/json:
+          type: <<bundleName>>
