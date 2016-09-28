@@ -50,8 +50,8 @@ http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/
 	meta: {
 		lastUpdated: now
 	},
-	total: sizeOf payload.ns0#GetConditionsResponse when payload.ns0#GetConditionsResponse is :object otherwise 0,
-	entry: payload.ns0#GetConditionsResponse.*Condition map 
+	total: sizeOf payload.GetConditionsResponse when payload.GetConditionsResponse is :object otherwise 0,
+	entry: payload.GetConditionsResponse.*Condition map 
 		{
 			fullUrl: p('baseUri') ++ "/Condition/" ++ $.id,
 			resource: {
@@ -74,7 +74,7 @@ http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/
 				verificationStatus: $.verificationStatus,
 				onsetDateTime: $.onsetDateTime
 			}
-	} when payload.ns0#GetConditionsResponse is :object otherwise []
+	} when payload.GetConditionsResponse is :object otherwise []
 }]]></dw:set-payload>
         </dw:transform-message>
     </flow>

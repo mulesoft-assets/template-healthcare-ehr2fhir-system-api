@@ -1,0 +1,20 @@
+<prac:GetPractitionersResponse xmlns:prac="http://example.com/practitioner-service">
+	 <prac:Practitioner>
+	    <prac:workAddressCity>San Francisco</prac:workAddressCity>
+	    <prac:gender>male</prac:gender>
+	    <prac:givenName>Jamie</prac:givenName>
+	    <prac:workAddressLine>Main Street 19</prac:workAddressLine>
+	    <prac:nameSuffix>MD</prac:nameSuffix>
+	    <prac:phoneUse>work</prac:phoneUse>
+	    <prac:birthDate>1969-07-25</prac:birthDate>
+	    <prac:phoneNumber>987-777-025</prac:phoneNumber>
+	    <prac:emailUse>work</prac:emailUse>
+	    <prac:familyName>Fletcher</prac:familyName>
+	    <prac:faxUse>work</prac:faxUse>
+	    <prac:workAddressCountry>United States of America</prac:workAddressCountry>
+	    <prac:workAddressPostalCode>09554</prac:workAddressPostalCode>
+	    <prac:id>11</prac:id>
+	    <prac:fax>746-9935</prac:fax>
+	    <prac:email>fletcher.jamie@doctor.org</prac:email>
+	 </prac:Practitioner>
+</prac:GetPractitionersResponse>

@@ -16,10 +16,8 @@ post:
       type: <<resourcePathName>>
       example: <<postExample>>
   responses:
-    200:
+    201:
       description: No match, resource created.
-    412:
-      description: Precondition Failed error indicating the client's criteria were not selective enough.
 get:
   description: This interaction searches a set of resources based on some filter criteria.
   is: [search]

@@ -1,0 +1,3 @@
+<slot:CreateAllergyIntoleranceResponse xmlns:slot="http://example.com/allergyIntolerance-service">
+    <id>12345</id>
+</slot:CreateAllergyIntoleranceResponse>

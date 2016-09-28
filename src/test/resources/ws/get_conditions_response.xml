@@ -1,0 +1,24 @@
+<con:GetConditionsResponse xmlns:con="http://www.example.com/condition-service">
+    <con:Condition>
+        <con:asserterReference>Patient/9</con:asserterReference>
+        <con:verificationStatus>confirmed</con:verificationStatus>
+        <con:conditionText>Asthma</con:conditionText>
+        <con:patientReference>Patient/9</con:patientReference>
+        <con:conditionCodingSystem>http://snomed.info/sct</con:conditionCodingSystem>
+        <con:asserterName></con:asserterName>
+        <con:id>1</con:id>
+        <con:onsetDateTime>2016-05-10</con:onsetDateTime>
+        <con:conditionCode>195967001</con:conditionCode>
+    </con:Condition>
+    <con:Condition>
+        <con:asserterReference>Patient/9</con:asserterReference>
+        <con:verificationStatus>confirmed</con:verificationStatus>
+        <con:conditionText>Diabetes mellitus</con:conditionText>
+        <con:patientReference>Patient/9</con:patientReference>
+        <con:conditionCodingSystem>http://snomed.info/sct</con:conditionCodingSystem>
+        <con:asserterName></con:asserterName>
+        <con:id>2</con:id>
+        <con:onsetDateTime>2016-05-11</con:onsetDateTime>
+        <con:conditionCode>73211009</con:conditionCode>
+    </con:Condition>
+</con:GetConditionsResponse>

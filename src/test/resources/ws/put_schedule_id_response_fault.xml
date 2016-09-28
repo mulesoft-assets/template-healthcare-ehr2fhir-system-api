@@ -1,0 +1,4 @@
+<ScheduleFault>
+	<errorCode>422</errorCode>
+	<errorMessage>Actor must be defined.</errorMessage>
+</ScheduleFault>

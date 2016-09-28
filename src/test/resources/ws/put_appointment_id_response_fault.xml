@@ -1,0 +1,4 @@
+<AppointmentFault>
+	<errorCode>422</errorCode>
+	<errorMessage>Appointment already exists for specified slot</errorMessage>
+</AppointmentFault>

@@ -1,0 +1,3 @@
+<slot:CreateSlotResponse xmlns:slot="http://example.com/slot-service">
+    <id>12345</id>
+</slot:CreateSlotResponse>

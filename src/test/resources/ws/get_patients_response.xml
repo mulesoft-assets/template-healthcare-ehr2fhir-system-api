@@ -1,0 +1,42 @@
+<pat:GetPatientsResponse xmlns:pat="http://example.com/patient-service">
+   <pat:Patient>
+      <pat:gender>male</pat:gender>
+      <pat:careProviderReference>Practitioner/1</pat:careProviderReference>
+      <pat:address1Line1>651 Bush Street</pat:address1Line1>
+      <pat:telecom1Value>4152292009</pat:telecom1Value>
+      <pat:givenName>Anna</pat:givenName>
+      <pat:maritalStatusDisplay/>
+      <pat:address1PostalCode>94105</pat:address1PostalCode>
+      <pat:address1City>San Francisco</pat:address1City>
+      <pat:birthDate>1970-02-12</pat:birthDate>
+      <pat:telecom2Value/>
+      <pat:maritalStatusCode/>
+      <pat:address1Country>United States of America</pat:address1Country>
+      <pat:familyName>Smith</pat:familyName>
+      <pat:telecom1Use>home</pat:telecom1Use>
+      <pat:telecom2Use/>
+      <pat:address1State>California</pat:address1State>
+      <pat:maritalStatusSystem/>
+      <pat:id>13556258</pat:id>
+   </pat:Patient>   
+   <pat:Patient>
+      <pat:gender>female</pat:gender>
+      <pat:careProviderReference>Practitioner/1</pat:careProviderReference>
+      <pat:address1Line1>1855 Folsom Street</pat:address1Line1>
+      <pat:telecom1Value>608-999-9654</pat:telecom1Value>
+      <pat:givenName>Veera</pat:givenName>
+      <pat:maritalStatusDisplay/>
+      <pat:address1PostalCode>53703</pat:address1PostalCode>
+      <pat:address1City>San Francisco</pat:address1City>
+      <pat:birthDate>1979-04-13</pat:birthDate>
+      <pat:telecom2Value/>
+      <pat:maritalStatusCode/>
+      <pat:address1Country>United States of America</pat:address1Country>
+      <pat:familyName>Radonctest</pat:familyName>
+      <pat:telecom1Use>home</pat:telecom1Use>
+      <pat:telecom2Use/>
+      <pat:address1State>Wisconsin</pat:address1State>
+      <pat:maritalStatusSystem/>
+      <pat:id>13556248</pat:id>
+   </pat:Patient>
+</pat:GetPatientsResponse>

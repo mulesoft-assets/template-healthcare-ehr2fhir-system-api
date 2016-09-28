@@ -1,0 +1,9 @@
+<slo:GetSlotResponse xmlns:slo="http://example.com/slot-service">
+  <slo:Slot>
+      <slo:freeBusyType>free</slo:freeBusyType>
+      <slo:scheduleReference>Schedule/1</slo:scheduleReference>
+      <slo:start>2016-09-12T05:30:00+00:00</slo:start>
+      <slo:end>2016-09-12T06:00:00+00:00</slo:end>
+      <slo:id>27</slo:id>
+  </slo:Slot>
+</slo:GetSlotResponse>

@@ -1,0 +1,3 @@
+<slot:CreateConditionResponse xmlns:slot="http://example.com/condition-service">
+    <id>12345</id>
+</slot:CreateConditionResponse>

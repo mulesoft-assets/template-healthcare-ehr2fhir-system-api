@@ -1,0 +1,10 @@
+<sch:GetSchedulesResponse xmlns:sch="https://www.example.com/schedule-service">
+    <sch:Schedule>
+        <sch:endDate></sch:endDate>
+        <sch:actorReference>Practitioner/1</sch:actorReference>
+        <sch:actorName>Jamie Fletcher, MD</sch:actorName>
+        <sch:comment></sch:comment>
+        <sch:id>1</sch:id>
+        <sch:startDate></sch:startDate>
+    </sch:Schedule>
+</sch:GetSchedulesResponse>

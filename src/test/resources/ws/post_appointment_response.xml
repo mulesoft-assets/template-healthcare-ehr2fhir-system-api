@@ -1,0 +1,3 @@
+<slot:CreateAppointmentResponse xmlns:slot="http://example.com/appointment-service">
+    <id>12345</id>
+</slot:CreateAppointmentResponse>

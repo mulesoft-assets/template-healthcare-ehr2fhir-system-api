@@ -1,0 +1,3 @@
+<slot:CreateScheduleResponse xmlns:slot="http://example.com/schedule-service">
+    <id>12345</id>
+</slot:CreateScheduleResponse>

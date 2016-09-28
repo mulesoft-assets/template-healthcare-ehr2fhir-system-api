@@ -1,0 +1,3 @@
+<slot:CreatePractitionerResponse xmlns:slot="http://example.com/practitioner-service">
+    <id>12345</id>
+</slot:CreatePractitionerResponse>

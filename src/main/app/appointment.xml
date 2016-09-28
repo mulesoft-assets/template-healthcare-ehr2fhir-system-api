@@ -35,7 +35,9 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
 ---
 "http://" ++ inboundProperties.host ++ inboundProperties."http.request.uri"]]></dw:set-variable>
         </dw:transform-message>
+        <logger message="#[message.payloadAs(java.lang.String)]" level="INFO" doc:name="Logger"/>
         <ws:consumer config-ref="Appointment" operation="GetAppointments" doc:name="Get Appointments"/>
+        <logger level="INFO" doc:name="Logger"/>
         <dw:transform-message doc:name="Transform to FHIR Bundle of Appointments">
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/json

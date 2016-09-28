@@ -1,0 +1,4 @@
+<AllergyIntoleranceFault>
+	<errorCode>422</errorCode>
+	<errorMessage>This AllergyIntolerance already exists for this patient</errorMessage>
+</AllergyIntoleranceFault>

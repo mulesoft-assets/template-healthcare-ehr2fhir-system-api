@@ -1,0 +1,3 @@
+<slot:CreatePatientResponse xmlns:slot="http://example.com/patient-service">
+    <id>12345</id>
+</slot:CreatePatientResponse>

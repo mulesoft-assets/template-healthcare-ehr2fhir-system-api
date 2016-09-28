@@ -1,0 +1,28 @@
+<app:GetAppointmentsResponse xmlns:app="http://example.com/appointment-service">
+    <app:Appointment>
+        <app:practitionerName>Jamie Fletcher, MD</app:practitionerName>
+        <app:durationMinutes></app:durationMinutes>
+        <app:patientName>Andreas Anderson</app:patientName>
+        <app:practitionerReference>Practitioner/1</app:practitionerReference>
+        <app:slotReference>Slot/15</app:slotReference>
+        <app:patientReference>Patient/9</app:patientReference>
+        <app:description></app:description>
+        <app:startTime>2016-10-28T14:30:00+00:00</app:startTime>
+        <app:endTime>2016-10-28T15:00:00+00:00</app:endTime>
+        <app:id>3</app:id>
+        <app:status>booked</app:status>
+    </app:Appointment>
+    <app:Appointment>
+        <app:practitionerName>Jamie Fletcher, MD</app:practitionerName>
+        <app:durationMinutes></app:durationMinutes>
+        <app:patientName>Andreas Anderson</app:patientName>
+        <app:practitionerReference>Practitioner/1</app:practitionerReference>
+        <app:slotReference>Slot/16</app:slotReference>
+        <app:patientReference>Patient/9</app:patientReference>
+        <app:description></app:description>
+        <app:startTime>2016-10-28T15:00:00+00:00</app:startTime>
+        <app:endTime>2016-10-28T15:30:00+00:00</app:endTime>
+        <app:id>4</app:id>
+        <app:status>booked</app:status>
+    </app:Appointment>
+</app:GetAppointmentsResponse>

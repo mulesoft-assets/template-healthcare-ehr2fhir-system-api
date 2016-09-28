@@ -1,0 +1,6 @@
+<ConditionFault>
+	<errorCode>422</errorCode>
+	<errorMessage>Condition with the provided code already exists</errorMessage>
+</ConditionFault>
+
+

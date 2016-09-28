@@ -1,0 +1,24 @@
+<all:GetAllergyIntolerancesResponse xmlns:all="http://example.com/allergy-service">
+    <all:AllergyIntolerance>
+        <all:substanceText>Peanuts</all:substanceText>
+        <all:reporterReference>Patient/9</all:reporterReference>
+        <all:recordedDate>2016-05-11</all:recordedDate>
+        <all:patientReference>Patient/9</all:patientReference>
+        <all:criticality></all:criticality>
+        <all:substanceCode></all:substanceCode>
+        <all:id>1</all:id>
+        <all:type></all:type>
+        <all:status>confirmed</all:status>
+    </all:AllergyIntolerance>
+    <all:AllergyIntolerance>
+        <all:substanceText>Aspirin</all:substanceText>
+        <all:reporterReference>Patient/9</all:reporterReference>
+        <all:recordedDate>2016-05-11</all:recordedDate>
+        <all:patientReference>Patient/9</all:patientReference>
+        <all:criticality></all:criticality>
+        <all:substanceCode></all:substanceCode>
+        <all:id>2</all:id>
+        <all:type></all:type>
+        <all:status>refuted</all:status>
+    </all:AllergyIntolerance>
+</all:GetAllergyIntolerancesResponse>

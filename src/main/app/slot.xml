@@ -139,18 +139,14 @@ using (slot = payload.GetSlotResponse.Slot){
 	},
 	start: slot.start,
 	end: slot.end,
-	freeBusyType: slot.freeBusyType,
-	text: {
-		div: "",
-		status: "empty"
-	}
+	freeBusyType: slot.freeBusyType
 }]]></dw:set-payload>
             <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
 %output application/java
 ---
 404 when payload.SlotFault != null otherwise 200]]></dw:set-property>
         </dw:transform-message>
-        <logger level="INFO" doc:name="probably not needed"/>
+
     </flow>
     <flow name="get:/Slot:api-config">
         <dw:transform-message doc:name="Prepare Get Slots request">
@@ -177,8 +173,8 @@ using (slot = payload.GetSlotResponse.Slot){
 {
 	resourceType: "Bundle",
 	type: "searchset",
-	total: sizeOf payload.ns0#GetSlotsResponse.*Slot 
-			when payload.ns0#GetSlotsResponse is :object otherwise 0,
+	total: sizeOf payload.GetSlotsResponse.*Slot 
+			when payload.GetSlotsResponse is :object otherwise 0,
 	meta: {
 		lastUpdated: now
 	},
@@ -186,7 +182,7 @@ using (slot = payload.GetSlotResponse.Slot){
 		relation: "self",
 		url: flowVars.requestURI
 	}],
-	entry: payload.ns0#GetSlotsResponse.*Slot map 
+	entry: payload.GetSlotsResponse.*Slot map 
 		{	
 			fullUrl: p('baseUri') ++ "/Slot/" as :string ++ $.id,
 			resource: {
@@ -199,7 +195,7 @@ using (slot = payload.GetSlotResponse.Slot){
 				end: $.end,
 				freeBusyType: $.freeBusyType
 			}
-	} when payload.ns0#GetSlotsResponse is :object otherwise []
+	} when payload.GetSlotsResponse is :object otherwise []
 }]]></dw:set-payload>
         </dw:transform-message>
     </flow>

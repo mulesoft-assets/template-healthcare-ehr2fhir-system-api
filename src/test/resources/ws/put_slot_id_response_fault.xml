@@ -1,0 +1,4 @@
+<SlotFault>
+	<errorCode>422</errorCode>
+	<errorMessage>There is a time conflict with Slot ID: 1</errorMessage>
+</SlotFault>

@@ -1,0 +1,22 @@
+<pat:GetPatientResponse xmlns:pat="http://example.com/patient-service">
+	<pat:Patient>
+	   <pat:id>9</pat:id>
+	   <pat:gender>female</pat:gender>
+	   <pat:givenName>Veera</pat:givenName>
+	   <pat:familyName>Radonctest</pat:familyName>
+	   <pat:careProviderReference>Practitioner/1</pat:careProviderReference>
+	   <pat:address1Line1>499 Folsom Street</pat:address1Line1>
+	   <pat:address1City>San Francisco</pat:address1City>
+	   <pat:address1State>California</pat:address1State>
+	   <pat:address1PostalCode>90354</pat:address1PostalCode>
+	   <pat:address1Country>United States of America</pat:address1Country>
+	   <pat:birthDate>1970-02-12</pat:birthDate>
+	   <pat:telecom1Use>home</pat:telecom1Use>
+	   <pat:telecom1Value>608-999-9005</pat:telecom1Value>
+	   <pat:telecom2Use/>
+	   <pat:telecom2Value/>
+	   <pat:maritalStatusCode/>
+	   <pat:maritalStatusSystem/>
+	   <pat:maritalStatusDisplay/>
+	</pat:Patient>
+</pat:GetPatientResponse>

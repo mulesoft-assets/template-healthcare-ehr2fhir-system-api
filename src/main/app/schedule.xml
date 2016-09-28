@@ -46,8 +46,8 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
 	meta: {
 		lastUpdated: now
 	},
-	total: sizeOf payload.ns0#GetSchedulesResponse when payload.ns0#GetSchedulesResponse is :object otherwise 0,
-	entry: payload.ns0#GetSchedulesResponse.*Schedule map 
+	total: sizeOf payload.GetSchedulesResponse when payload.GetSchedulesResponse is :object otherwise 0,
+	entry: payload.GetSchedulesResponse.*Schedule map 
 		{
 			fullUrl: p('baseUri') ++ "/Schedule/" ++ $.id,
 			resource: {
@@ -63,7 +63,7 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
 					reference: $.actorReference
 				}
 		}
-	} when payload.ns0#GetSchedulesResponse is :object otherwise []
+	} when payload.GetSchedulesResponse is :object otherwise []
 }]]></dw:set-payload>
         </dw:transform-message>
     </flow>

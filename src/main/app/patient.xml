@@ -44,8 +44,8 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 	meta: {
 		lastUpdated: now
 	},
-	total: sizeOf payload.ns0#GetPatientsResponse when payload.ns0#GetPatientsResponse is :object otherwise 0, 
-	entry: payload.ns0#GetPatientsResponse.*Patient map 
+	total: sizeOf payload.GetPatientsResponse when payload.GetPatientsResponse is :object otherwise 0, 
+	entry: payload.GetPatientsResponse.*Patient map 
 		{
 			fullUrl: p('baseUri') ++ "/Patient/" ++ $.id,
 			resource: {
@@ -85,7 +85,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 					value: $.telecom1Value
 				}]
 			}
-		} when payload.ns0#GetPatientsResponse is :object otherwise []
+		} when payload.GetPatientsResponse is :object otherwise []
 	
 }]]></dw:set-payload>
         </dw:transform-message>
@@ -186,16 +186,18 @@ using (patient = payload.ns0#GetPatientResponse.Patient){
 }]]></dw:set-payload>
         </dw:transform-message>
         <ws:consumer config-ref="Patient" operation="CreatePatient" doc:name="Create Patient"/>
-        <dw:transform-message doc:name="Set Location property and clear payload">
-            <dw:set-payload><![CDATA[%dw 1.0
-%output application/java
----
-null]]></dw:set-payload>
+        <dw:transform-message doc:name="Set Location and HTTP status">
             <dw:set-property propertyName="Location"><![CDATA[%dw 1.0
 %output application/java
 ---
 p('baseUri') ++ '/Patient/' ++ payload.CreatePatientResponse.id]]></dw:set-property>
+            <dw:set-property propertyName="http.status"><![CDATA[%dw 1.0
+%output application/java
+---
+201]]></dw:set-property>
+
         </dw:transform-message>
+        <set-payload value="#[NullPayload.getInstance()]" doc:name="NullPayload"/>
     </flow>
     <flow name="put:/Patient/{id}:application/json:api-config">
         <dw:transform-message doc:name="Prepare Update Patient request">
@@ -272,8 +274,8 @@ payload.UpdatePatientResponse.status]]></dw:set-property>
 	meta: {
 		lastUpdated: now
 	},
-	total: sizeOf payload.ns0#GetConditionsResponse when payload.ns0#GetConditionsResponse is :object otherwise 0,
-	entry: payload.ns0#GetConditionsResponse.*Condition map 
+	total: sizeOf payload.GetConditionsResponse when payload.GetConditionsResponse is :object otherwise 0,
+	entry: payload.GetConditionsResponse.*Condition map 
 		{
 			fullUrl: p('baseUri') ++ "/Condition/" ++ $.id,
 			resource: {
@@ -296,7 +298,7 @@ payload.UpdatePatientResponse.status]]></dw:set-property>
 				verificationStatus: $.verificationStatus,
 				onsetDateTime: $.onsetDateTime
 			}
-	} when payload.ns0#GetConditionsResponse is :object otherwise []
+	} when payload.GetConditionsResponse is :object otherwise []
 	
 }]]></dw:set-payload>
         </dw:transform-message>
@@ -333,8 +335,8 @@ payload.UpdatePatientResponse.status]]></dw:set-property>
 	meta: {
 		lastUpdated: now
 	},
-	total: sizeOf payload.ns0#GetAllergyIntolerancesResponse when payload.ns0#GetAllergyIntolerancesResponse is :object otherwise 0,
-	entry: payload.ns0#GetAllergyIntolerancesResponse.*AllergyIntolerance map 
+	total: sizeOf payload.GetAllergyIntolerancesResponse when payload.GetAllergyIntolerancesResponse is :object otherwise 0,
+	entry: payload.GetAllergyIntolerancesResponse.*AllergyIntolerance map 
 		{
 		fullUrl: p('baseUri') ++ "AllergyIntolerance/" ++ $.id,
 		resource: {
@@ -357,7 +359,7 @@ payload.UpdatePatientResponse.status]]></dw:set-property>
 			(status: $.status) when $.status != null and $.status != "",
 			(type: $.type) when $.type != null and $.type != ""
 		}
-	} when payload.ns0#GetAllergyIntolerancesResponse is :object otherwise []
+	} when payload.GetAllergyIntolerancesResponse is :object otherwise []
 }]]></dw:set-payload>
         </dw:transform-message>
     </flow>
@@ -393,8 +395,8 @@ payload.UpdatePatientResponse.status]]></dw:set-property>
 	meta: {
 		lastUpdated: now
 	},
-	total: sizeOf payload.ns0#GetAppointmentsResponse when payload.ns0#GetAppointmentsResponse is :object otherwise 0,
-	entry: payload.ns0#GetAppointmentsResponse.*Appointment map 
+	total: sizeOf payload.GetAppointmentsResponse when payload.GetAppointmentsResponse is :object otherwise 0,
+	entry: payload.GetAppointmentsResponse.*Appointment map 
 		{
 		fullUrl: p('baseUri') ++ "/Appointment/" ++ $.id,
 		resource: {
@@ -427,7 +429,7 @@ payload.UpdatePatientResponse.status]]></dw:set-property>
 				}
 			]
 		}
-	} when payload.ns0#GetAppointmentsResponse is :object otherwise []
+	} when payload.GetAppointmentsResponse is :object otherwise []
 }]]></dw:set-payload>
         </dw:transform-message>
     </flow>
