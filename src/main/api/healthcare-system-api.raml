@@ -327,19 +327,13 @@ traits:
       /{vid}:
         type: { fhirVersionedResource: { resourceName: Patient } }
     /Condition:
-      type:  fhirCompartment
+      type:  { fhirCompartment: { example: !include examples/responses/get_condition.json} }
       is: [ conditionSearch ]
-    /Observation:
-      type: fhirCompartment
-      is: [ observationSearch ]
-    /MedicationOrder:
-      type: fhirCompartment
-      is: [ medicationOrderSearch ]
     /Appointment:
-      type: fhirCompartment
+      type: { fhirCompartment: { example: !include examples/responses/get_appointment.json} }
       is: [ appointmentSearch ]
     /AllergyIntolerance:
-      type: fhirCompartment
+      type: { fhirCompartment: { example: !include examples/responses/get_allergyIntolerance.json} }
       is: [ allergyIntoleranceSearch ]
   /_search:
     type: { fhirSearch: { bundleName: PatientBundle } }
@@ -375,10 +369,10 @@ traits:
       /{vid}:
         type: { fhirVersionedResource: { resourceName: Practitioner } }
     /Schedule:
-      type: fhirCompartment
+      type: { fhirCompartment: { example: !include examples/responses/get_schedule.json} }
       is: [ scheduleSearch ]
     /Appointment:
-      type: fhirCompartment
+      type: { fhirCompartment: { example: !include examples/responses/get_appointment.json} }
       is: [ appointmentSearch ]
   /_search:
     type: { fhirSearch: { bundleName: PractitionerBundle } }
