@@ -107,13 +107,12 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
             <dw:input-payload/>
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/json
-%namespace ns0 http://example.com/patient-service
 ---
 {
 	message: payload.PatientFault.errorMessage
 } when payload.PatientFault != null otherwise
 
-using (patient = payload.ns0#GetPatientResponse.Patient){
+using (patient = payload.GetPatientResponse.Patient){
 	resourceType: "Patient",
 	id: patient.id,
 	address: [{
@@ -125,7 +124,7 @@ using (patient = payload.ns0#GetPatientResponse.Patient){
 		postalCode: patient.address1PostalCode,
 		(state: patient.address1State) when patient.address1State != null
 	}],
-	birthDate: patient.birthDate,
+	(birthDate: patient.birthDate) when patient.birthDate != null and patient.birthDate != "",
 	careProvider: [{
 		reference: patient.careProviderReference
 	}],
