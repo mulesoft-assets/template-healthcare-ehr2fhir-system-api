@@ -30,7 +30,9 @@ types:
   uri:                          !include dataTypes/primitives/uri.raml
   xhtml:                        !include dataTypes/primitives/markdown.raml
 
-  #Elements  
+  #Elements
+  Extension:                    !include dataTypes/elements/Extension.raml  
+  Element:                      !include dataTypes/elements/Element.raml
   Address:                      !include dataTypes/elements/Address.raml
   Age:                          Quantity
   Annotation:                   !include dataTypes/elements/Annotation.raml
@@ -41,8 +43,6 @@ types:
   Conformance:                  !include dataTypes/resources/Conformance.raml
   ContactPoint:                 !include dataTypes/elements/ContactPoint.raml
   Duration:                     !include dataTypes/elements/Duration.raml
-  Element:                      !include dataTypes/elements/Element.raml
-  Extension:                    !include dataTypes/elements/Extension.raml
   HumanName:                    !include dataTypes/elements/HumanName.raml
   Identifier:                   !include dataTypes/elements/Identifier.raml
   Meta:                         !include dataTypes/elements/Meta.raml
