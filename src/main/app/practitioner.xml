@@ -16,6 +16,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 
 <flow name="post:/Practitioner:application/json:api-config">
         <dw:transform-message doc:name="Prepare Create Practitioner request">
+			<dw:input-payload mimeType="application/json"/>
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/xml
 %namespace ns0 http://example.com/practitioner-service
@@ -59,6 +60,7 @@ p('baseUri') ++ '/Practitioner/' ++ payload.CreatePractitionerResponse.id]]></dw
     </flow>
     <flow name="put:/Practitioner/{id}:application/json:api-config">
         <dw:transform-message doc:name="Prepare Update Practitioner request">
+			<dw:input-payload mimeType="application/json"/>
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/xml
 %namespace ns0 http://example.com/practitioner-service
