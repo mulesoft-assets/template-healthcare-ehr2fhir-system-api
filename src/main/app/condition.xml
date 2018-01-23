@@ -82,6 +82,7 @@ http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/
 
 <flow name="post:/Condition:application/json:api-config">
         <dw:transform-message doc:name="Prepare request">
+			<dw:input-payload mimeType="application/json"/>
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/xml
 %namespace ns0 http://example.com/condition-service
@@ -136,6 +137,7 @@ p('baseUri') ++ '/Condition/' ++ payload.CreateConditionResponse.id]]></dw:set-p
     </flow>
     <flow name="put:/Condition/{id}:application/json:api-config">
         <dw:transform-message doc:name="Prepare request">
+			<dw:input-payload mimeType="application/json"/>
             <dw:set-payload><![CDATA[%dw 1.0
 %output application/xml
 %namespace ns0 http://example.com/condition-service
