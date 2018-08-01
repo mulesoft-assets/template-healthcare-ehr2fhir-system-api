@@ -1,0 +1,1924 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd">
+	<flow name="getAllergyIntolerances" doc:id="f7e01780-edb4-4224-bba8-8b927c00a1af">
+		<ee:transform doc:name="Prepare Request"
+			doc:id="c4030ae5-54e6-4190-b3ff-fc8f4bec9c7a">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/allergy-service
+---
+{
+	ns0#GetAllergyIntolerances: {
+		(patientID: (attributes.queryParams.patient splitBy("/"))[-1] )
+			if attributes.queryParams.patient != null,
+		(substanceText: attributes.queryParams.substance)
+			if attributes.queryParams.substance != null
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="requestParams"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	url: "http://" ++ attributes.headers.host ++ attributes.requestUri,
+	path: "http://" ++ attributes.headers.host ++ attributes.requestPath ++ "/"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<wsc:consume doc:name="Get AllergyIntolerances"
+			doc:id="0343f5c7-9b78-40a2-a720-da9690fa8294" config-ref="AllergyIntolerance"
+			operation="GetAllergyIntolerances" />
+		<ee:transform doc:name="Transform to FHIR Bundle of AllergyIntolerances"
+			doc:id="1425df55-0290-4c6e-8de9-4560b71940f1">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://example.com/allergy-service
+---
+{
+	resourceType: "Bundle",
+	"type": "searchset",
+	link: [{
+		relation: "self",
+		url: vars.requestParams.url
+	}],
+	meta: {
+		lastUpdated: now()
+	},
+	(total: if (payload.body.ns0#GetAllergyIntolerancesResponse is Object) sizeOf(payload.body.ns0#GetAllergyIntolerancesResponse) else 0),
+	(entry: if (payload.body.ns0#GetAllergyIntolerancesResponse is Object) payload.body.ns0#GetAllergyIntolerancesResponse.*AllergyIntolerance map 
+		{
+		fullUrl: vars.requestParams.path ++ $.id,
+		resource: {
+			resourceType: "AllergyIntolerance",
+			id: $.id,
+			patient: {
+				reference: $.patientReference
+			},
+			recorder: {
+				reference: $.reporterReference
+			},
+			reaction: [{
+				substance: {
+					coding: [{
+						(code: $.substanceCode) if $.substanceCode != null and $.substanceCode != "",
+						display: $.substanceText
+					}]
+				}
+			}],
+			assertedDate: $.recordedDate,
+			(criticality: $.criticality) if $.criticality != null and $.criticality != "",
+			(verificationStatus: $.status) if $.status != null and $.status != "",
+			("type": $."type") if $."type" != null and $."type" != ""
+		}
+	}  else [])
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="createAllergyIntolerance" doc:id="74624ef0-32e1-4238-ba3f-42b8d60a48cf">
+		<ee:transform doc:name="Prepare Request"
+			doc:id="02ead802-67d3-44bb-91ba-28d697c19961">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/allergy-service
+---
+{
+	ns0#CreateAllergyIntolerance: {
+		recordedDate: payload.assertedDate default "",
+		patientReference: payload.patient.reference default "",
+		reporterReference: payload.recorder.reference default "",
+		substanceCode: payload.reaction[0].substance.coding[0].code default "",
+		substanceText: payload.reaction[0].substance.coding[0].display default "",
+		criticality: payload.criticality default "",
+		"type": payload."type" default "",
+		status: payload.verificationStatus default "unconfirmed"
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="requestParams"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	path: "http://" ++ attributes.headers.host ++ attributes.requestPath ++ "/"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<wsc:consume doc:name="Create AllergyIntolerance"
+			doc:id="a6a2d8e0-9bbb-4977-a593-4849f3d3fd5e" config-ref="AllergyIntolerance"
+			operation="CreateAllergyIntolerance" />
+		<choice doc:name="Successful?" doc:id="aae258bf-92ee-418e-a26a-f5f8cee55413">
+			<when expression="#[payload.body.AllergyIntoleranceFault == null]">
+				<ee:transform doc:name="Success Response"
+					doc:id="bf0c8221-1ef8-45e4-8f80-1d3c7902c61c">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: payload.body.CreateAllergyIntoleranceResponse.id
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+201]]></ee:set-variable>
+						<ee:set-variable variableName="outboundHeaders"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	Location: vars.requestParams.path ++ payload.body.CreateAllergyIntoleranceResponse.id
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Error Message"
+					doc:id="e302c986-c3bb-4f15-b057-c4494a393521">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: payload.body.AllergyIntoleranceFault.errorMessage
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+422]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="updateAllergyIntolerance" doc:id="e7a62084-5324-460c-8955-7b1973108075">
+		<ee:transform doc:name="Prepare Request"
+			doc:id="2b49cfcb-6f84-4849-bb75-80e4bfb95414">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/allergy-service
+---
+{
+	ns0#UpdateAllergyIntolerance: {
+		id: attributes.uriParams.id,
+		recordedDate: payload.assertedDate default "",
+		patientReference: payload.patient.reference default "",
+		reporterReference: payload.recorder.reference default "",
+		substanceCode: payload.reaction[0].substance.coding[0].code default "",
+		substanceText: payload.reaction[0].substance.coding[0].display default "",
+		criticality: payload.criticality default "",
+		"type": payload."type" default "",
+		status: payload.verificationStatus default "unconfirmed"
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume doc:name="UpdateAllergyIntolerance"
+			doc:id="61049387-3e8b-43fb-92d9-3c89f945fa70" config-ref="AllergyIntolerance"
+			operation="UpdateAllergyIntolerance" />
+		<choice doc:name="Successful?" doc:id="10937751-c542-4b20-bcc1-813c80b26f61">
+			<when expression="#[payload.body.AllergyIntoleranceFault == null]">
+				<ee:transform doc:name="Success Response"
+					doc:id="0d95a654-b3c2-4253-ad9d-cfef880f93a0">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+payload.body.UpdateAllergyIntoleranceResponse.status]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Error Message"
+					doc:id="b6d5e3f9-ce30-4dd0-8040-28e3f3cd6230">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: payload.body.AllergyIntoleranceFault.errorMessage
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+payload.body.AllergyIntoleranceFault.errorCode]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="getAppointments" doc:id="f707ce14-d034-47e0-b081-0a662f4621dc">
+		<ee:transform doc:name="Prepare Request"
+			doc:id="8b9d50cb-780b-48fb-af0f-f132939c6c64">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/appointment-service
+---
+{
+	ns0#GetAppointments: {
+		(patientID: (attributes.queryParams.patient splitBy("/")[-1]))
+			if attributes.queryParams.patient != null,
+		(practitionerID: (attributes.queryParams.practitioner splitBy("/")[-1]))
+			if attributes.queryParams.practitioner != null
+		
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="requestParams"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	url: "http://" ++ attributes.headers.host ++ attributes.requestUri,
+	path: "http://" ++ attributes.headers.host ++ attributes.requestPath ++ "/"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<wsc:consume doc:name="Get Appointments"
+			doc:id="782223d1-97b5-494f-a86f-3dcc2f7ff4f4" config-ref="Appointment"
+			operation="GetAppointments" />
+		<ee:transform doc:name="Transform to FHIR Bundle of Appointments"
+			doc:id="9db89fb7-9298-47f1-adf6-9bcf5afa0f1e">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://example.com/appointment-service
+---
+{
+	resourceType: "Bundle",
+	"type": "searchset",
+	link: [{
+		relation: "self",
+		url: vars.requestParams.url
+	}],
+	meta: {
+		lastUpdated: now()
+	},
+	(total: if(payload.body.ns0#GetAppointmentsResponse is Object) sizeOf(payload.body.ns0#GetAppointmentsResponse) else 0),
+	(entry: if(payload.body.ns0#GetAppointmentsResponse is Object) payload.body.ns0#GetAppointmentsResponse.*Appointment map 
+		{
+		fullUrl: vars.requestParams.path ++ $.id,
+		resource: {
+			resourceType: "Appointment",
+			id: $.id,
+			description: $.description,
+			start: $.startTime,
+			end: $.endTime,
+			(minutesDuration: $.durationMinutes) if ($.durationMinutes != null and $.durationMinutes != ""),
+			participant: [
+				{
+					status: "accepted",
+					actor: {
+						reference: $.patientReference,
+						display: $.patientName
+					}
+				},
+				{
+					status: "accepted",
+					actor: {
+						reference: $.practitionerReference,
+						display: $.practitionerName
+					}
+				}
+			],
+			status: $.status,
+			slot: [
+				{
+					reference: $.slotReference
+				}
+			]
+		}
+	} else [])
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="createAppointment" doc:id="73d3747f-8eed-4896-9854-d4ae77b527dd">
+		<ee:transform doc:name="Prepare Request"
+			doc:id="f2f7b9b0-44ba-483e-b3b0-0b4473bf72f1">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/appointment-service
+---
+{
+	ns0#CreateAppointment: {
+		startTime: payload.start,
+		endTime: payload.end,
+		description: payload.description default "",
+		durationMinutes: payload.minutesDuration default "",
+		patientReference: (payload.participant.actor.reference filter ($ startsWith "Patient"))[0] default "",
+		patientName: (payload.participant filter ($.actor.reference startsWith "Patient"))[0].actor.display default "",
+		practitionerReference: (payload.participant.actor.reference filter ($ startsWith "Practitioner"))[0] default "",
+		practitionerName: (payload.participant filter ($.actor.reference startsWith "Practitioner"))[0].actor.display default "",
+		status: payload.status default "free",
+		slotReference: payload.slot[0].reference default ""
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="requestParams"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	path: "http://" ++ attributes.headers.host ++ attributes.requestPath ++ "/"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<wsc:consume doc:name="Create Appointment"
+			doc:id="15bc360f-04ad-4149-bfde-22fc129598d1" config-ref="Appointment"
+			operation="CreateAppointment" />
+		<choice doc:name="Successful?" doc:id="8d868772-0258-4d3a-8957-c0fc020042a6">
+			<when expression="#[payload.body.AppointmentFault == null]">
+				<ee:transform doc:name="Set Location and httpStatus"
+					doc:id="29e8d3da-e8af-4f1d-b246-b87e649e0767">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: payload.body.CreateAppointmentResponse.id
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+201]]></ee:set-variable>
+						<ee:set-variable variableName="outboundHeaders"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	Location: vars.requestParams.path ++ payload.body.CreateAppointmentResponse.id
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Error Message"
+					doc:id="f191f369-8351-4398-96b6-d2dba53fd029">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: payload.body.AppointmentFault.errorMessage
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+422]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="getConditions" doc:id="7155a756-76be-43dd-b094-ad52f5f667f0">
+		<ee:transform doc:name="Prepare Request"
+			doc:id="e3017d23-4e7c-4266-934f-549c3001030a">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/condition-service
+---
+{
+	ns0#GetConditions: {
+		patientID: (attributes.queryParams.patient splitBy("/"))[1],
+		(conditionCode: attributes.queryParams.code) if attributes.queryParams.code != null
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="requestParams"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	url: "http://" ++ attributes.headers.host ++ attributes.requestUri,
+	path: "http://" ++ attributes.headers.host ++ attributes.requestPath ++ "/"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<wsc:consume doc:name="Get Conditions"
+			doc:id="6600bd11-d148-4622-a69f-0b15c45e8f58" config-ref="Condition"
+			operation="GetConditions" />
+		<ee:transform doc:name="Transform to FHIR Bundle of Conditions"
+			doc:id="6d2af191-5938-49b4-9e7e-31e6f0cd779a">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://example.com/condition-service
+---
+{
+	resourceType: "Bundle",
+	"type": "searchset",
+	link: [{
+		relation: "self",
+		url: vars.requestParams.url
+	}],
+	meta: {
+		lastUpdated: now()
+	},
+	(total: if(payload.body.GetConditionsResponse is Object) sizeOf(payload.body.GetConditionsResponse) else 0),
+	(entry: if (payload.body.GetConditionsResponse is Object) payload.body.GetConditionsResponse.*Condition map 
+		{
+			fullUrl: vars.requestParams.path ++ $.id,
+			resource: {
+				resourceType: "Condition",
+				id: $.id,
+				subject: {
+					reference: $.patientReference
+				},
+				asserter: {
+					reference: $.asserterReference,
+					display: $.asserterName
+				},
+				code: {
+					coding: [{
+						code: $.conditionCode,
+						display: $.conditionText,
+						system: $.conditionCodingSystem
+					}]
+				},
+				verificationStatus: $.verificationStatus,
+				onsetDateTime: $.onsetDateTime
+			}
+	} else [])
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="createCondition" doc:id="8fe31fdc-3bcc-4cc2-9289-2aecf7a20260">
+		<ee:transform doc:name="Prepare Request"
+			doc:id="045f1b31-1047-4ad2-982f-d8235367c219">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/condition-service
+---
+{
+	ns0#CreateCondition: {
+		conditionCode: payload.code.coding[0].code default "",
+		conditionCodingSystem: payload.code.coding[0].system default "",
+		onsetDateTime: payload.onsetDateTime default "",
+		conditionText: payload.code.coding[0].display default "",
+		asserterName: payload.asserter.display default "",
+		asserterReference: payload.asserter.reference default "",
+		patientReference: payload.subject.reference default "",
+		verificationStatus: payload.verificationStatus default "" 
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="requestParams"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	path: "http://" ++ attributes.headers.host ++ attributes.requestPath ++ "/"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<wsc:consume operation="CreateCondition" doc:name="Create Condition"
+			doc:id="26626338-8b3a-4124-bc80-3cfc30328b91" config-ref="Condition" />
+		<choice doc:name="Successful?" doc:id="e81e7b51-e7f7-444e-8e42-b30bde33caab">
+			<when expression="#[payload.body.ConditionFault == null]">
+				<ee:transform doc:name="Success Response"
+					doc:id="791e24d3-27f5-462b-95c6-04280410b070">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: payload.body.CreateConditionResponse.id
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+201]]></ee:set-variable>
+						<ee:set-variable variableName="outboundHeaders"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	Location: vars.requestParams.path ++ payload.body.CreateConditionResponse.id
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Error Message"
+					doc:id="a10b4936-5d57-4f47-b6b3-2815ea598e65">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: payload.body.ConditionFault.errorMessage
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+422]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="updateCondition" doc:id="29c25be5-0846-4437-b711-ecca37da10b4">
+		<ee:transform doc:name="Prepare Request"
+			doc:id="f41c0829-0109-43f0-bd37-903d3d6fe5ca">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/condition-service
+---
+{
+	ns0#UpdateCondition: {
+		id: attributes.uriParams.id,
+		conditionCode: payload.code.coding[0].code default "",
+		conditionCodingSystem: payload.code.coding[0].system default "",
+		onsetDateTime: payload.onsetDateTime default "",
+		conditionText: payload.code.coding[0].display default "",
+		asserterName: payload.asserter.display default "",
+		asserterReference: payload.asserter.reference default "",
+		patientReference: payload.subject.reference default "",
+		verificationStatus: payload.verificationStatus default ""
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume operation="UpdateCondition" doc:name="Update Condition"
+			doc:id="aeeb5631-6009-47a0-8ec6-d7f0da8346a7" config-ref="Condition" />
+		<choice doc:name="Successful?" doc:id="e6818af2-6700-4aba-9358-42445964f682">
+			<when expression="#[payload.body.ConditionFault == null]">
+				<ee:transform doc:name="Success Response"
+					doc:id="a2ea5f6e-5385-44c9-9e96-dac4b1af24f4">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+payload.body.UpdateConditionResponse.status]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Error Message"
+					doc:id="20d74108-b6b6-464b-9646-c9a49b223563">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: payload.body.ConditionFault.errorMessage
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+payload.body.ConditionFault.errorCode]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="getPatients" doc:id="8c424c44-a4af-4a58-8164-73ce6179553a">
+		<ee:transform doc:name="Prepare Request"
+			doc:id="5999d378-d9c0-44a7-aeb8-4fcb60c94c84">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/patient-service
+---
+{
+	ns0#GetPatients: {
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="requestParams"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	url: "http://" ++ attributes.headers.host ++ attributes.requestUri,
+	path: "http://" ++ attributes.headers.host ++ attributes.requestPath ++ "/"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<wsc:consume operation="GetPatients" doc:name="Get Patients"
+			doc:id="5e4e7dc6-64d9-41a9-b828-a299474f1038" config-ref="Patient" />
+		<ee:transform doc:name="Transform to FHIR Bundle of Patients"
+			doc:id="63bb18a8-e943-4c13-9809-130a1e6f2980">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://example.com/patient-service
+---
+{
+	resourceType: "Bundle",
+	"type": "searchset",
+	link: [{
+		relation: "self",
+		url: vars.requestParams.url,
+	}],
+	meta: {
+		lastUpdated: now()
+	},
+	(total: if (payload.body.GetPatientsResponse is Object) sizeOf(payload.body.GetPatientsResponse) else 0), 
+	(entry: if (payload.body.GetPatientsResponse is Object) 
+	(payload.body.GetPatientsResponse.*Patient map 
+		{
+			fullUrl: vars.requestParams.path ++ $.id,
+			resource: {
+				resourceType: "Patient",
+				id: $.id, 
+				address: [{
+					city: $.address1City,
+					country: $.address1Country,
+					line: [ $.address1Line1],
+					postalCode: $.address1PostalCode,
+					(state: $.address1State) if $.address1State != null
+				}],
+				birthDate: $.birthDate,
+				generalPractitioner: [{
+					reference: $.careProviderReference
+				}],
+				gender: $.gender,
+				(maritalStatus: {
+					coding: [{
+						code: $.maritalStatusCode,
+						system: $.maritalStatusSystem,
+						display: $.maritalStatusDisplay
+					}]
+				}) if $.maritalStatusDisplay != "",
+				name: [{
+					use: "official",
+					family: [$.familyName],
+					given: [$.givenName],
+					(prefix: [$.title]) if $.title != null,
+					(suffix: [$.nameSuffix])  if $.nameSuffix != null
+				}],
+				telecom: [{
+					system: "phone",
+					use: $.telecom1Use,
+					value: $.telecom1Value
+				}]
+			}
+		}) else [])
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getPatient" doc:id="770ee098-e16d-43c7-92c5-a896bd2c7e43">
+		<ee:transform doc:name="Prepare Request"
+			doc:id="93f525c8-4073-4f23-ab45-86be1456a1cf">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/patient-service
+---
+{
+	ns0#GetPatient: {
+		id: attributes.uriParams.id
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume doc:name="Get Patient"
+			doc:id="30665ba2-9aa4-48b4-9848-c3c291162667" config-ref="Patient"
+			operation="GetPatient" />
+		<ee:transform doc:name="Transform to FHIR Patient"
+			doc:id="96383245-18f2-43c7-80c7-cb6480b3811e">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+if (payload.body.PatientFault != null) {
+	message: payload.body.PatientFault.errorMessage
+}  else
+using (patient = payload.body.GetPatientResponse.Patient){
+	resourceType: "Patient",
+	id: patient.id,
+	address: [{
+		city: patient.address1City,
+		country: patient.address1Country,
+		line: [
+      patient.address1Line1
+    ],
+		postalCode: patient.address1PostalCode,
+		(state: patient.address1State) if (patient.address1State != null)
+	}],
+	(birthDate: patient.birthDate) if patient.birthDate != null and patient.birthDate != "",
+	generalPractitioner: [{
+		reference: patient.careProviderReference
+	}],
+	gender: patient.gender,
+	(maritalStatus: {
+		coding: [{
+			code: patient.maritalStatusCode,
+			system: patient.maritalStatusSystem,
+			display: patient.maritalStatusDisplay
+		}]
+	}) if (patient.maritalStatusDisplay != ""),
+	name: [{
+		use: "official",
+		family: [patient.familyName],
+		given: [patient.givenName],
+		(prefix: [patient.title]) if patient.title != null,
+		(suffix: [patient.nameSuffix])  if patient.nameSuffix != null
+	}],
+	telecom: [{
+		system: "phone",
+		use: patient.telecom1Use,
+		value: patient.telecom1Value
+	}]
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+if (payload.body.PatientFault != null) 
+	payload.body.PatientFault.errorCode
+else 200]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</flow>
+	<flow name="createPatient" doc:id="6e198f38-c0ec-4220-977a-cf0ac350df25">
+		<ee:transform doc:name="Prepare Request"
+			doc:id="817cbac0-1581-48a4-ae8a-01fb268584b1">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/patient-service
+---
+{
+	ns0#CreatePatient: {
+		familyName: payload.name[0].family[0],
+		givenName: payload.name[0].given[0],
+		gender: payload.gender,
+		birthDate: payload.birthDate,
+		maritalStatusCode: payload.maritalStatus.coding[0].code,
+		maritalStatusSystem: payload.maritalStatus.coding[0].system,
+		maritalStatusDisplay: payload.maritalStatus.coding[0].display,
+		address1City: payload.address[0].city,
+		address1Country: payload.address[0].country,
+		address1Line1: payload.address[0].line[0],
+		address1PostalCode: payload.address[0].postalCode,
+		address1State: payload.address[0].state,
+		(telecom1Use: if (payload.telecom is Array and payload.telecom[0] != null) payload.telecom[0].use else ""),
+		(telecom1Value: if(payload.telecom is Array and payload.telecom[0] != null) payload.telecom[0].value else ""),
+		(telecom2Use: if(payload.telecom is Array and  payload.telecom[1] != null) payload.telecom[1].use  else ""),
+		(telecom2Value: if(payload.telecom is Array and payload.telecom[1] != null) payload.telecom[1].value  else ""),
+		careProviderReference: payload.generalPractitioner[0].reference default ""
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="requestParams"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	path: "http://" ++ attributes.headers.host ++ attributes.requestPath ++ "/"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<wsc:consume operation="CreatePatient" doc:name="Create Patient"
+			doc:id="f052b161-6714-4831-ba3e-c34bbc562e50" config-ref="Patient" />
+		<ee:transform doc:name="Set Location and HTTP status"
+			doc:id="142ba017-f990-4d49-a238-a2cc09b0072c">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: payload.body.CreatePatientResponse.id
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+201]]></ee:set-variable>
+				<ee:set-variable variableName="outboundHeaders"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	Location: vars.requestParams.path ++ payload.body.CreatePatientResponse.id
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</flow>
+	<flow name="updatePatient" doc:id="d3832792-e336-4f8c-8a17-ac85978cdf6b">
+		<ee:transform doc:name="Prepare Request"
+			doc:id="c532bcda-85fa-4050-8696-448f6879558b">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/patient-service
+---
+{
+	ns0#UpdatePatient: {
+		id: attributes.uriParams.id,
+		familyName: payload.name[0].family[0] default "",
+		givenName: payload.name[0].given[0] default "",
+		gender: payload.gender default "",
+		birthDate: payload.birthDate default "",
+		maritalStatusCode: payload.maritalStatus.coding[0].code default "",
+		maritalStatusSystem: payload.maritalStatus.coding[0].system default "",
+		maritalStatusDisplay: payload.maritalStatus.coding[0].display default "",
+		address1City: payload.address[0].city default "",
+		address1Country: payload.address[0].country default "",
+		address1Line1: payload.address[0].line[0] default "",
+		address1PostalCode: payload.address[0].postalCode default "",
+		address1State: payload.address[0].state default "",
+		(telecom1Use: if (payload.telecom is Array and payload.telecom[0] != null) payload.telecom[0].use else ""),
+		(telecom1Value: if(payload.telecom is Array and payload.telecom[0] != null) payload.telecom[0].value else ""),
+		(telecom2Use: if(payload.telecom is Array and  payload.telecom[1] != null) payload.telecom[1].use  else ""),
+		(telecom2Value: if(payload.telecom is Array and payload.telecom[1] != null) payload.telecom[1].value  else ""),		
+		careProviderReference: payload.generalPractitioner[0].reference default ""
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume doc:name="Update Patient"
+			doc:id="e15cc255-acb3-4199-bd0d-9ec17a4fd7c7" config-ref="Patient"
+			operation="UpdatePatient" />
+		<ee:transform doc:name="Set HTTP status"
+			doc:id="8866feb6-288f-421e-87fb-c8329668bdae">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+payload.body.UpdatePatientResponse.status]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</flow>
+	<flow name="getPatientConditions" doc:id="2b378bee-b2b4-4723-bbde-4ef1a2d7910e">
+		<ee:transform doc:name="Prepare Request"
+			doc:id="362323cd-a94a-45cf-8eeb-4b22c7ea5d8e">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/condition-service
+---
+{
+	ns0#GetConditions: {
+		patientID: attributes.uriParams.id
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="requestParams"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	url: "http://" ++ attributes.headers.host ++ attributes.requestUri,
+	path: "http://" ++ attributes.headers.host ++ attributes.requestPath ++ "/"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<wsc:consume doc:name="Get Conditions"
+			doc:id="8a91c2b7-540a-4abb-b7a6-f352514ac05a" config-ref="Condition"
+			operation="GetConditions" />
+		<ee:transform doc:name="Transform to FHIR Bundle of Conditions"
+			doc:id="c50b0c28-d6df-41f9-9496-6485b1004e56">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://example.com/condition-service
+---
+{
+	resourceType: "Bundle",
+	"type": "searchset",
+	link: [{
+		relation: "self",
+		url: vars.requestParams.url
+	}],
+	meta: {
+		lastUpdated: now()
+	},
+	(total: if(payload.body.GetConditionsResponse is Object) sizeOf(payload.body.GetConditionsResponse) else 0),
+	(entry: if (payload.body.GetConditionsResponse is Object) payload.body.GetConditionsResponse.*Condition map 
+		{
+			fullUrl: vars.requestParams.path ++ $.id,
+			resource: {
+				resourceType: "Condition",
+				id: $.id,
+				subject: {
+					reference: $.patientReference
+				},
+				asserter: {
+					reference: $.asserterReference,
+					display: $.asserterName
+				},
+				code: {
+					coding: [{
+						code: $.conditionCode,
+						display: $.conditionText,
+						system: $.conditionCodingSystem
+					}]
+				},
+				verificationStatus: $.verificationStatus,
+				onsetDateTime: $.onsetDateTime
+			}
+	}  else [])
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getPatientAllergyIntolerances" doc:id="c0ce92ff-e941-45ff-8273-337c86e0d488">
+		<ee:transform doc:name="Prepare Request"
+			doc:id="701b1482-03fb-40e9-8142-0beeb41491a3">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/allergy-service
+---
+{
+	ns0#GetAllergyIntolerances: {
+		patientID: attributes.uriParams.id
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="requestParams"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	url: "http://" ++ attributes.headers.host ++ attributes.requestUri,
+	path: "http://" ++ attributes.headers.host ++ attributes.requestPath ++ "/"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<wsc:consume operation="GetAllergyIntolerances" doc:name="Get AllergyIntolerances"
+			doc:id="6864b867-6473-4bd6-a6d2-ab2e088867cf" config-ref="AllergyIntolerance" />
+		<ee:transform doc:name="Transform to FHIR Bundle of AllergyIntolerances"
+			doc:id="1d1a12fb-10ba-4d8f-b85d-c78ca5d7bd45">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://example.com/allergy-service
+---
+{
+	resourceType: "Bundle",
+	"type": "searchset",
+	link: [{
+		relation: "self",
+		url: vars.requestParams.url
+	}],
+	meta: {
+		lastUpdated: now()
+	},
+	(total: if(payload.body.GetAllergyIntolerancesResponse is Object) sizeOf(payload.body.GetAllergyIntolerancesResponse) else 0),
+	(entry: if(payload.body.GetAllergyIntolerancesResponse is Object) payload.body.GetAllergyIntolerancesResponse.*AllergyIntolerance map 
+		{
+		fullUrl: vars.requestParams.path ++ $.id,
+		resource: {
+			resourceType: "AllergyIntolerance",
+			id: $.id,
+			patient: {
+				reference: $.patientReference
+			},
+			recorder: {
+				reference: $.reporterReference
+			},
+			reaction: [{
+				substance: {
+					coding: [{
+						(code: $.substanceCode) if $.substanceCode != null and $.substanceCode != "",
+						display: $.substanceText
+					}]
+				}
+			}],
+			assertedDate: $.recordedDate,
+			(criticality: $.criticality) if $.criticality != null and $.criticality != "",
+			(verificationStatus: $.status) if $.status != null and $.status != "",
+			("type": $."type") if ($."type" != null and $."type" != "")
+		}
+	} else [])
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getPatientAppointments" doc:id="287a5b80-068b-46cc-b3d2-db3e7d37534c">
+		<ee:transform doc:name="Prepare Request"
+			doc:id="4ce7c8d2-9bb5-4b2a-9995-6ec3a1f7b173">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/appointment-service
+---
+{
+	ns0#GetAppointments: {
+		patientID: attributes.uriParams.id
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="requestParams"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	url: "http://" ++ attributes.headers.host ++ attributes.requestUri,
+	path: "http://" ++ attributes.headers.host ++ attributes.requestPath ++ "/"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<wsc:consume operation="GetAppointments" doc:name="Get Appointments"
+			doc:id="9cbc94e1-1aee-4a63-8a84-e4884c87bb9f" config-ref="Appointment" />
+
+		<ee:transform doc:name="Transform to FHIR Bundle of Appointments"
+			doc:id="9e295c85-d99e-4833-9ed4-7cde4fc91a55">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://example.com/appointment-service
+---
+{
+	resourceType: "Bundle",
+	"type": "searchset",
+	link: [{
+		relation: "self",
+		url: vars.requestParams.url
+	}],
+	meta: {
+		lastUpdated: now()
+	},
+	(total: if(payload.body.GetAppointmentsResponse is Object) sizeOf(payload.body.GetAppointmentsResponse) else 0),
+	(entry: if(payload.body.GetAppointmentsResponse is Object) payload.body.GetAppointmentsResponse.*Appointment map 
+		{
+		fullUrl: vars.requestParams.path ++ $.id,
+		resource: {
+			resourceType: "Appointment",
+			id: $.id,
+			description: $.description,
+			start: $.startTime,
+			end: $.endTime,
+			minutesDuration: $.durationMinutes,
+			participant: [
+				{
+					status: "accepted",
+					actor: {
+						reference: $.patientReference,
+						display: $.patientName
+					}
+				},
+				{
+					status: "accepted",
+					actor: {
+						reference: $.practitionerReference,
+						display: $.practitionerName
+					}
+				}
+			],
+			status: $.status,
+			slot: [
+				{
+					reference: $.slotReference
+				}
+			]
+		}
+	} else [])
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="createPractitioner" doc:id="7e5e8c65-47d4-42c3-b029-5aa6d2b7aad5">
+		<ee:transform doc:name="Prepare Request"
+			doc:id="17664041-d09f-41aa-84b5-ecd2e5fca6c7">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/practitioner-service
+---
+{
+	ns0#CreatePractitioner: {
+		familyName: payload.name[0].family[0],
+		givenName: payload.name[0].given[0],
+		nameSuffix: payload.name[0].suffix[0],
+		(email: if(payload.telecom != null) (payload.telecom filter $.system == "email")[0].value  else ""),
+		(emailUse: if(payload.telecom != null) (payload.telecom filter $.system == "email")[0].use else ""),
+		(fax: if(payload.telecom != null) (payload.telecom filter $.system == "fax")[0].value  else ""),
+		(faxUse: if(payload.telecom != null) (payload.telecom filter $.system == "fax")[0].use else ""),
+		gender: payload.gender,
+		birthDate: payload.birthDate,
+		workAddressCity: payload.address[0].city,
+		workAddressCountry: payload.address[0].country,
+		workAddressLine: payload.address[0].line[0],
+		workAddressPostalCode: payload.address[0].postalCode,
+		workAddressState: payload.address[0].state,
+		(phoneUse: if(payload.telecom is Array and payload.telecom[0] != null) payload.telecom[0].use else ""),
+		(phoneNumber: if(payload.telecom is Array and payload.telecom[0] != null) payload.telecom[0].value else ""),
+		careProviderReference: payload.careProvider[0].reference default ""
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="requestParams"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	path: "http://" ++ attributes.headers.host ++ attributes.requestPath ++ "/"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<wsc:consume doc:name="Create Practitioner"
+			doc:id="b3e0f5f2-3b8d-4fe3-8c7e-5948fd462376" config-ref="Practitioner"
+			operation="CreatePractitioner" />
+
+		<ee:transform doc:name="Set Location and HTTP status"
+			doc:id="31ad61d2-bb9e-4637-a617-3703e3d41ec9">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: payload.body.CreatePractitionerResponse.id
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+---
+201]]></ee:set-variable>
+				<ee:set-variable variableName="outboundHeaders"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	Location: vars.requestParams.path ++ payload.body.CreatePractitionerResponse.id
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</flow>
+	<flow name="updatePractitioner" doc:id="a70926b8-fffb-4758-b827-25fd661dc853">
+		<ee:transform doc:name="Prepare Request"
+			doc:id="4ce4eeec-a8a4-46ff-8e22-f6fd0ae7747f">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/practitioner-service
+---
+{
+	ns0#UpdatePractitioner: {
+		ns0#id: attributes.uriParams.id,
+		ns0#familyName: payload.name[0].family[0],
+		ns0#givenName: payload.name[0].given[0],
+		ns0#nameSuffix: payload.name[0].suffix[0],
+		ns0#email: if(payload.telecom != null) (payload.telecom filter $.system == "email")[0].value else "",
+		ns0#emailUse: if(payload.telecom != null) (payload.telecom filter $.system == "email")[0].use else "",
+		ns0#fax: if(payload.telecom != null) (payload.telecom filter $.system == "fax")[0].value else "",
+		ns0#faxUse: if(payload.telecom != null) (payload.telecom filter $.system == "fax")[0].use else "",
+		ns0#gender: payload.gender,
+		ns0#birthDate: payload.birthDate,
+		ns0#workAddressCity: payload.address[0].city,
+		ns0#workAddressCountry: payload.address[0].country,
+		ns0#workAddressLine: payload.address[0].line[0],
+		ns0#workAddressPostalCode: payload.address[0].postalCode,
+		ns0#workAddressState: payload.address[0].state,
+		ns0#phoneUse: if(payload.telecom is Array and payload.telecom[0] != null) payload.telecom[0].use else "",
+		ns0#phoneNumber: if(payload.telecom is Array and payload.telecom[0] != null) payload.telecom[0].value else "",
+		ns0#careProviderReference: payload.careProvider[0].reference default ""
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume doc:name="Update Practitioner"
+			doc:id="62512633-8c7f-4452-b3da-b050bbafca86" config-ref="Practitioner"
+			operation="UpdatePractitioner" />
+		<ee:transform doc:name="Set httpStatus"
+			doc:id="ebf5a129-4b0e-4775-b0e6-35812c7e4b37">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/java
+ns ns0 http://mulesoft.org/practitioner-service
+---
+payload.body.UpdatePractitionerResponse.status]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</flow>
+	<flow name="getPractitioners" doc:id="00cc6cca-1543-44d1-a9fe-b5a8cda3fcfc">
+		<ee:transform doc:name="Prepare Request"
+			doc:id="06839bd5-c2cf-4130-9c74-17a386f02676">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/practitioner-service
+---
+{
+	ns0#GetPractitioners: {
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="requestParams"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	url: "http://" ++ attributes.headers.host ++ attributes.requestUri,
+	path: "http://" ++ attributes.headers.host ++ attributes.requestPath ++ "/"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<wsc:consume doc:name="Get Practitioners"
+			doc:id="ab654f0f-76fb-4561-8ceb-796e5dd94713" config-ref="Practitioner"
+			operation="GetPractitioners" />
+		<ee:transform doc:name="Transform to FHIR Bundle of Practitioners"
+			doc:id="fb9d0515-202a-4d99-b730-62a7a0c540df">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://example.com/practitioner-service
+---
+{
+	resourceType: "Bundle",
+	"type": "searchset",
+	(total: if (payload.body.ns0#GetPractitionersResponse is Object) sizeOf(payload.body.ns0#GetPractitionersResponse.*Practitioner) 
+			else 0),
+	meta: {
+		lastUpdated: now()
+	},
+	link: [{
+		relation: "self",
+		url: vars.requestParams.url
+	}],
+	(entry: if(payload.body.ns0#GetPractitionersResponse is Object) 
+		payload.body.ns0#GetPractitionersResponse.*Practitioner map 
+		{	
+			fullUrl: vars.requestParams.path ++ $.id,
+			resource: {
+				resourceType: "Practitioner",
+				id: $.id,
+				address: [{
+					city: $.workAddressCity,
+					country: $.workAddressCountry,
+					line: [
+			      		$.workAddressLine
+			    	],
+					postalCode: $.workAddressPostalCode	
+				}],
+				birthDate: $.birthDate,
+				gender: $.gender,
+				name: [{
+					use: "official",
+					family: [$.familyName],
+					given: [$.givenName],
+					(prefix: [$.title]) if $.title != null,
+					(suffix: [$.nameSuffix])  if $.nameSuffix != null
+				}],
+				telecom: [
+					({
+						system: "phone",
+						use: $.phoneUse,
+						value: $.phoneNumber
+					}) if ($.phoneNumber != null),
+					({
+						system: "fax",
+						use: $.faxUse,
+						value: $.fax
+					}) if ($.fax != null),
+					({
+						system: "email",
+						use: $.emailUse,
+						value: $.email
+					}) if ($.email != null)
+				]	
+			}
+	} else [])
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getPractitioner" doc:id="5b80a0db-b064-43d5-a6a4-4b53344ff374">
+		<ee:transform doc:name="Prepare Request"
+			doc:id="b6d801be-5ed8-4049-b46b-94a2d508071e">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/practitioner-service
+---
+{
+	ns0#GetPractitioner: {
+		id: attributes.uriParams.id
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+			</ee:variables>
+		</ee:transform>
+		<wsc:consume doc:name="Get Practitioner"
+			doc:id="de713d66-5f0b-4241-b2dc-daa835aec2b5" config-ref="Practitioner"
+			operation="GetPractitioner" />
+		<ee:transform doc:name="Transform to FHIR Practitioner"
+			doc:id="d76a44e3-8494-4c89-9eb9-c104ddbcd487">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://example.com/practitioner-service
+---
+if(payload.body.PractitionerFault != null){
+	message: payload.body.PractitionerFault.errorMessage
+} else
+using (practitioner = payload.body.GetPractitionerResponse.Practitioner){
+	resourceType: "Practitioner",
+	id: practitioner.id,
+	address: [{
+		city: practitioner.workAddressCity,
+		country: practitioner.workAddressCountry,
+		line: [
+      		practitioner.workAddressLine
+    	],
+		postalCode: practitioner.workAddressPostalCode	
+	}],
+	birthDate: practitioner.birthDate,
+	gender: practitioner.gender,
+	name: [{
+		use: "official",
+		family: [practitioner.familyName],
+		given: [practitioner.givenName],
+		(prefix: [practitioner.title]) if practitioner.title != null,
+		(suffix: [practitioner.nameSuffix])  if practitioner.nameSuffix != null
+	}],
+	telecom: [
+		({
+			system: "phone",
+			use: practitioner.phoneUse,
+			value: practitioner.phoneNumber
+		}) if(practitioner.phoneNumber != null),
+		({
+			system: "fax",
+			use: practitioner.faxUse,
+			value: practitioner.fax
+		}) if(practitioner.fax != null),
+		({
+			system: "email",
+			use: practitioner.emailUse,
+			value: practitioner.email
+		}) if(practitioner.email != null)
+	]
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getPractitionerSchedule" doc:id="b40d86b9-3d5e-443b-9fde-ab12cf5b6a94">
+		<ee:transform doc:name="Prepare Request"
+			doc:id="f0e35bfe-eda6-44f4-b83f-f6ce437cd530">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/schedule-service
+---
+{
+	ns0#GetSchedules: {
+		actorReference: "Practitioner/" ++ attributes.uriParams.id
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="requestParams"><![CDATA[%dw 2.0
+output application/java
+---
+{
+	url: "http://" ++ attributes.headers.host ++ attributes.requestUri,
+	path: "http://" ++ attributes.headers.host ++ attributes.requestPath ++ "/"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<wsc:consume doc:name="Get Schedules"
+			doc:id="08dda69f-db2e-44b7-a795-31ca225f5525" config-ref="Schedule"
+			operation="GetSchedules" />
+		<ee:transform doc:name="Transform to FHIR Bundle of Schedules" doc:id="f6658352-7726-4ddb-b62c-2afb0b541026" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://example.com/schedule-service
+---
+{
+	resourceType: "Bundle",
+	"type": "searchset",
+	link: [{
+		relation: "self",
+		url: vars.requestParams.url
+	}],
+	meta: {
+		lastUpdated: now()
+	},
+	(total: if(payload.body.GetSchedulesResponse is Object) sizeOf(payload.body.GetSchedulesResponse) else 0),
+	(entry: if(payload.body.GetSchedulesResponse is Object) payload.body.GetSchedulesResponse.*Schedule map 
+		{
+			fullUrl: vars.requestParams.path ++ $.id,
+			resource: {
+				resourceType: "Schedule",
+				id: $.id,
+				comment: $.comment,
+				planningHorizon: {
+					start: $.startDate,
+					end: $.endDate
+				},
+				actor: {
+					display: $.actorName,
+					reference: $.actorReference
+				}
+		}
+	} else [])
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getPractitionerAppointment" doc:id="70397cb0-ba5e-4cb6-a401-6f7b7040e24f" >
+		<ee:transform doc:name="Prepare Request" doc:id="0684a4f0-0bd4-4cc7-9255-bafcc2a95f0d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/appointment-service
+---
+{
+	ns0#GetAppointments: {
+		practitionerID: attributes.uriParams.id
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="requestParams" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	url: "http://" ++ attributes.headers.host ++ attributes.requestUri,
+	path: "http://" ++ attributes.headers.host ++ attributes.requestPath ++ "/"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<wsc:consume operation="GetAppointments" doc:name="Get Appointments" doc:id="ba2638a8-bf67-4c14-8290-adef12eb3f82" config-ref="Appointment"/>
+		<ee:transform doc:name="Transform to FHIR Bundle of Appointments" doc:id="5b7ed982-f3a8-465a-90b8-fe09f3e1ddcb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://example.com/appointment-service
+---
+{
+	resourceType: "Bundle",
+	"type": "searchset",
+	link: [{
+		relation: "self",
+		url: vars.requestParams.url
+	}],
+	meta: {
+		lastUpdated: now()
+	},
+	(total: if(payload.body.ns0#GetAppointmentsResponse is Object) sizeOf(payload.body.ns0#GetAppointmentsResponse) else 0),
+	(entry: if (payload.body.ns0#GetAppointmentsResponse is Object) payload.body.ns0#GetAppointmentsResponse.*Appointment map 
+		{
+		fullUrl: vars.requestParams.path ++ $.id,
+		resource: {
+			resourceType: "Appointment",
+			id: $.id,
+			description: $.description,
+			start: $.startTime,
+			end: $.endTime,
+			(minutesDuration: $.durationMinutes) if ($.durationMinutes != null and $.durationMinutes != ""),
+			participant: [
+				{
+					status: "accepted",
+					actor: {
+						reference: $.patientReference,
+						display: $.patientName
+					}
+				},
+				{
+					status: "accepted",
+					actor: {
+						reference: $.practitionerReference,
+						display: $.practitionerName
+					}
+				}
+			],
+			status: $.status,
+			slot: [
+				{
+					reference: $.slotReference
+				}
+			]
+		}
+	} else [])
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getSchedules" doc:id="aedfbd70-0992-43c3-9996-6f58e2a216fe" >
+		<ee:transform doc:name="Prepare Request" doc:id="0c45b0f9-a952-4d62-8b64-9db9f16e6de1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/schedule-service
+---
+{
+	ns0#GetSchedules: {
+		(actorReference: attributes.queryParams.actor)
+		 if attributes.queryParams.actor != null
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="requestParams" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	url: "http://" ++ attributes.headers.host ++ attributes.requestUri,
+	path: "http://" ++ attributes.headers.host ++ attributes.requestPath ++ "/"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<wsc:consume doc:name="Get Schedules" doc:id="6b2bda96-bb72-442f-9e64-6e1aedb92992" config-ref="Schedule" operation="GetSchedules"/>
+		<ee:transform doc:name="Transform to FHIR Bundle of Schedules" doc:id="78b59553-f7b5-4dab-8663-a898cf0c4c8c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://example.com/schedule-service
+---
+{
+	resourceType: "Bundle",
+	"type": "searchset",
+	link: [{
+		relation: "self",
+		url: vars.requestParams.url
+	}],
+	meta: {
+		lastUpdated: now()
+	},
+	(total: if (payload.body.GetSchedulesResponse is Object) sizeOf(payload.body.GetSchedulesResponse) else 0),
+	(entry: if(payload.body.GetSchedulesResponse is Object) payload.body.GetSchedulesResponse.*Schedule map 
+		{
+			fullUrl: vars.requestParams.path ++ $.id,
+			resource: {
+				resourceType: "Schedule",
+				id: $.id,
+				comment: $.comment,
+				(planningHorizon: {
+					start: $.startDate,
+					end: $.endDate
+				}) if $.startDate != null,
+				actor: {
+					display: $.actorName,
+					reference: $.actorReference
+				}
+		}
+	}  else [])
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="createSchedule" doc:id="75805caf-6424-4397-8caa-e4ed910b7fdf" >
+		<ee:transform doc:name="Prepare Request" doc:id="cee3d822-d546-40a4-977c-f9da98653d84" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/schedule-service
+---
+{
+	ns0#CreateSchedule: {
+		(startDate: if(payload.planningHorizon.start != null) payload.planningHorizon.start as DateTime else ""),
+		(endDate: if(payload.planningHorizon.end != null) payload.planningHorizon.end as DateTime else ""),
+		comment: payload.comment default "",
+		actorName: payload.actor.display default "",
+		actorReference: payload.actor.reference default ""
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="requestParams" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	path: "http://" ++ attributes.headers.host ++ attributes.requestPath ++ "/"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<wsc:consume doc:name="Create Schedule" doc:id="1ce4d27d-5693-4dee-9e0d-fc16924869f0" config-ref="Schedule" operation="CreateSchedule"/>
+		<choice doc:name="Successful?" doc:id="06544da0-0bce-499e-8358-04d8137e3959" >
+			<when expression="#[payload.body.ScheduleFault == null]" >
+				<ee:transform doc:name="Set Location and httpStatus" doc:id="7e652e6c-8c6c-4acb-a413-38de975b5801" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: payload.body.CreateScheduleResponse.id
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+201]]></ee:set-variable>
+						<ee:set-variable variableName="outboundHeaders" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	Location: vars.requestParams.path ++ payload.body.CreateScheduleResponse.id
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Error Message" doc:id="249274ea-2a8a-4801-a235-a1cf988a6cb5" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: payload.body.ScheduleFault.errorMessage
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+422]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="createSlot" doc:id="b60bf945-be48-4146-8946-d819424bb2bf" >
+		<ee:transform doc:name="Prepare Request" doc:id="70d0175f-20a9-496d-8126-9a76c323276e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/slot-service
+---
+{
+	ns0#CreateSlot: {
+		scheduleReference: payload.schedule.reference default "",
+		start: payload.start as DateTime default "",
+		end: payload.end as DateTime default "",
+		freeBusyType: payload.status default "free"
+	}
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="requestParams" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	path: "http://" ++ attributes.headers.host ++ attributes.requestPath ++ "/"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<wsc:consume doc:name="Create Slot" doc:id="8dc49058-4d79-4e11-b389-d187c405cb72" config-ref="Slot" operation="CreateSlot"/>
+		<choice doc:name="Successful?" doc:id="de331416-c20f-4511-a046-b434833e85e8" >
+			<when expression="#[payload.body.SlotFault == null]" >
+				<ee:transform doc:name="Set Location and httpStatus" doc:id="4efb2978-5727-4a67-85e2-dfda6bb6e226" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: payload.body.CreateSlotResponse.id
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+201]]></ee:set-variable>
+						<ee:set-variable variableName="outboundHeaders" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	Location: vars.requestParams.path ++ payload.body.CreateSlotResponse.id
+}
+]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Error Message" doc:id="3d50f857-9ab1-4bd4-b107-a50044a89940" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: payload.body.SlotFault.errorMessage
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+422]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="updateSlot" doc:id="084d9fee-c9f7-4f11-a1ea-d4871ac3b9df" >
+		<ee:transform doc:name="Prepare Request" doc:id="c2f7fe08-7b22-41be-b032-42d390990c56" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/slot-service
+---
+{
+	ns0#UpdateSlot: {
+		id: attributes.uriParams.id,
+		scheduleReference: payload.schedule.reference default "",
+		start: payload.start as DateTime default "",
+		end: payload.end as DateTime default "",
+		freeBusyType: payload.status default "free"
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume operation="UpdateSlot" doc:name="Update Slot" doc:id="0d6bc0b0-a7a1-43ba-b155-2c96d5cd38e2" config-ref="Slot"/>
+		<choice doc:name="Successful?" doc:id="e6330261-1e46-4452-a581-0cfe7f950a86" >
+			<when expression="#[payload.body.SlotFault == null]" >
+				<ee:transform doc:name="Set httpStatus" doc:id="c80ae6f9-e5e9-421f-9d53-e209f3287c7a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.body.UpdateSlotResponse.status]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Error Message" doc:id="f25358a3-c762-44d4-9e7c-9a40beff9553" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: payload.SlotFault.errorMessage
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+payload.body.SlotFault.errorCode]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+	<flow name="getSlots" doc:id="96b08de1-0c3e-4a62-9270-261267be24e3" >
+		<ee:transform doc:name="Prepare Request" doc:id="56b94797-39ac-4fd4-9bf5-61fabd2a7188" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/slot-service
+---
+{
+	ns0#GetSlots: {
+		scheduleReference: attributes.queryParams.schedule
+	}
+}]]></ee:set-payload>
+			</ee:message>
+				<ee:variables>
+				<ee:set-variable variableName="requestParams" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	url: "http://" ++ attributes.headers.host ++ attributes.requestUri,
+	path: "http://" ++ attributes.headers.host ++ attributes.requestPath ++ "/"
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<wsc:consume doc:name="Get Slots" doc:id="015df5fa-21ba-4f12-8725-9e4a6b3ad309" config-ref="Slot" operation="GetSlots"/>
+		<ee:transform doc:name="Transform to FHIR Bundle of Slots" doc:id="a0f52319-e608-4512-8028-7a7afa92daac" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://example.com/slot-service
+---
+{
+	resourceType: "Bundle",
+	"type": "searchset",
+	(total: if (payload.body.GetSlotsResponse is Object) sizeOf(payload.body.GetSlotsResponse.*Slot) 
+			else 0),
+	meta: {
+		lastUpdated: now()
+	},
+	link: [{
+		relation: "self",
+		url: vars.requestParams.url
+	}],
+	(entry: if(payload.body.GetSlotsResponse is Object) payload.body.GetSlotsResponse.*Slot map 
+		{	
+			fullUrl: vars.requestParams.path ++ $.id,
+			resource: {
+				resourceType: "Slot",
+				id: $.id,
+				schedule: {
+					reference: $.scheduleReference
+				},
+				start: $.start,
+				end: $.end,
+				status: $.freeBusyType
+			}
+	} else [])
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getSlot" doc:id="f8da6012-bb54-464c-bbfe-69f1a296c14d" >
+		<ee:transform doc:name="Prepare Request" doc:id="88c16153-df56-4096-8012-03cde91152b8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://example.com/slot-service
+---
+{
+	ns0#GetSlot: {
+		id: attributes.uriParams.id
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume doc:name="Get Slot" doc:id="774844ed-81fa-453c-9049-c15497aa75e2" config-ref="Slot" operation="GetSlot"/>
+		<ee:transform doc:name="Transform to FHIR Slot" doc:id="49a0ea57-399d-457f-97a3-15383123d4cc" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://example.com/slot-service
+---
+if (payload.body.SlotFault != null) {
+	message: payload.body.SlotFault.errorMessage
+} else
+
+using (slot = payload.body.GetSlotResponse.Slot){
+	resourceType: "Slot",
+	id: slot.id,
+	schedule: {
+		reference: slot.scheduleReference
+	},
+	start: slot.start,
+	end: slot.end,
+	status: slot.freeBusyType
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+if (payload.body.SlotFault != null) 404  else 200]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</flow>
+</mule>

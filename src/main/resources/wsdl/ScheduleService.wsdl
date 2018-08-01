@@ -1,0 +1,236 @@
+<?xml version="1.0"?>
+
+<wsdl:definitions name="ScheduleService" targetNamespace="http://example.com/schedule-service"
+    xmlns:ms="http://example.com/schedule-service" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+
+    <wsdl:types>
+
+        <xsd:schema targetNamespace="http://example.com/schedule-service" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+   			<xsd:complexType name="Schedules">
+            	<xsd:sequence>
+              	 	<xsd:element minOccurs="0" maxOccurs="unbounded" name="Schedule" nillable="true" type="ms:Schedule" />
+           	 	</xsd:sequence>
+       		</xsd:complexType>
+
+    		<xsd:complexType name="Schedule">
+              <xsd:all>
+                  <xsd:element name="id"  type="xsd:string" />
+                  <xsd:element name="actorReference"  type="xsd:string" />
+                  <xsd:element name="actorName" type="xsd:string" />
+                  <xsd:element name="startDate" type="xsd:dateTime" />
+                  <xsd:element name="endDate" type="xsd:dateTime" />
+                  <xsd:element name="comment" type="xsd:string" />
+             </xsd:all>
+        </xsd:complexType>
+
+
+            <xsd:element name="CreateSchedule" type="ms:Schedule" />
+            <xsd:element name="CreateScheduleResponse">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="id" type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+
+
+            <xsd:element name="GetSchedule">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="id"  type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+             <xsd:element name="GetScheduleResponse">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="Schedule" type="ms:Schedule" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+
+
+            <xsd:element name="GetSchedules">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="actorReference"  type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="GetSchedulesResponse" type="ms:Schedules" />
+
+
+            <xsd:element name="UpdateSchedule" type="ms:Schedule" />
+            <xsd:element name="UpdateScheduleResponse">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="status" type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="ScheduleFault">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="errorCode" type="xsd:string" />
+                        <xsd:element name="errorMessage" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+        </xsd:schema>
+    </wsdl:types>
+
+    <wsdl:message name="CreateSchedule">
+        <wsdl:part name="body" element="ms:CreateSchedule" />
+    </wsdl:message>
+
+    <wsdl:message name="CreateScheduleResponse">
+        <wsdl:part name="body" element="ms:CreateScheduleResponse" />
+    </wsdl:message>
+
+
+    <wsdl:message name="GetSchedule">
+        <wsdl:part name="body" element="ms:GetSchedule" />
+    </wsdl:message>
+
+    <wsdl:message name="GetScheduleResponse">
+        <wsdl:part name="body" element="ms:GetScheduleResponse" />
+    </wsdl:message>
+
+
+    <wsdl:message name="GetSchedules">
+    	<wsdl:part name="body" element="ms:GetSchedules" />
+    </wsdl:message>
+
+    <wsdl:message name="GetSchedulesResponse">
+        <wsdl:part name="body" element="ms:GetSchedulesResponse" />
+    </wsdl:message>
+
+
+    <wsdl:message name="UpdateSchedule">
+    	<wsdl:part name="body" element="ms:UpdateSchedule" />
+    </wsdl:message>
+
+    <wsdl:message name="UpdateScheduleResponse">
+        <wsdl:part name="body" element="ms:UpdateScheduleResponse" />
+    </wsdl:message>
+
+
+
+    <wsdl:message name="ScheduleFault">
+        <wsdl:part name="fault" element="ms:ScheduleFault" />
+    </wsdl:message>
+
+    <!-- wsdl:portType describes messages in an operation -->
+    <wsdl:portType name="ScheduleServicePortType">
+
+        <wsdl:operation name="CreateSchedule">
+            <wsdl:input message="ms:CreateSchedule" />
+            <wsdl:output message="ms:CreateScheduleResponse" />
+            <wsdl:fault name="ScheduleFault" message="ms:ScheduleFault" />
+        </wsdl:operation>
+
+        <wsdl:operation name="GetSchedule">
+            <wsdl:input message="ms:GetSchedule" />
+            <wsdl:output message="ms:GetScheduleResponse" />
+            <wsdl:fault name="ScheduleFault" message="ms:ScheduleFault" />
+        </wsdl:operation>
+
+        <wsdl:operation name="GetSchedules">
+            <wsdl:input message="ms:GetSchedules" />
+            <wsdl:output message="ms:GetSchedulesResponse" />
+            <wsdl:fault name="ScheduleFault" message="ms:ScheduleFault" />
+        </wsdl:operation>
+
+        <wsdl:operation name="UpdateSchedule">
+            <wsdl:input message="ms:UpdateSchedule" />
+            <wsdl:output message="ms:UpdateScheduleResponse" />
+            <wsdl:fault name="ScheduleFault" message="ms:ScheduleFault" />
+        </wsdl:operation>
+
+
+    </wsdl:portType>
+
+    <wsdl:binding name="ScheduleServiceSoapBinding" type="ms:ScheduleServicePortType">
+
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+
+        <wsdl:operation name="CreateSchedule">
+
+            <soap:operation soapAction="http://example.com/schedule-service/create-schedule" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/schedule-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/schedule-service" />
+            </wsdl:output>
+            <wsdl:fault name="ScheduleFault">
+                <soap:body use="literal" namespace="http://example.com/schedule-service" />
+            </wsdl:fault>
+
+        </wsdl:operation>
+
+        <wsdl:operation name="GetSchedule">
+
+            <soap:operation soapAction="http://example.com/schedule-service/get-schedule" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/schedule-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/schedule-service" />
+            </wsdl:output>
+            <wsdl:fault name="ScheduleFault">
+                <soap:body use="literal" namespace="http://example.com/schedule-service" />
+            </wsdl:fault>
+        </wsdl:operation>
+
+
+        <wsdl:operation name="GetSchedules">
+
+            <soap:operation soapAction="http://example.com/schedule-service/get-schedules" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/schedule-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/schedule-service" />
+            </wsdl:output>
+            <wsdl:fault name="ScheduleFault">
+                <soap:body use="literal" namespace="http://example.com/schedule-service" />
+            </wsdl:fault>
+        </wsdl:operation>
+
+
+        <wsdl:operation name="UpdateSchedule">
+
+            <soap:operation soapAction="http://example.com/schedule-service/update-schedule" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/schedule-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/schedule-service" />
+            </wsdl:output>
+            <wsdl:fault name="ScheduleFault">
+                <soap:body use="literal" namespace="http://example.com/schedule-service" />
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="ScheduleService">
+        <wsdl:documentation></wsdl:documentation>
+
+        <!-- connect it to the binding "EndorsementSearchSoapBinding" above -->
+        <wsdl:port name="ScheduleServicePort" binding="ms:ScheduleServiceSoapBinding">
+
+            <!-- give the binding an network address -->
+            <soap:address location="http://scheduleservice.getsandbox.com/scheduleService" />
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>

@@ -1,0 +1,242 @@
+<?xml version="1.0"?>
+
+<wsdl:definitions name="AppointmentService" targetNamespace="http://example.com/appointment-service"
+    xmlns:ms="http://example.com/appointment-service" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+
+    <wsdl:types>
+
+        <xsd:schema targetNamespace="http://example.com/appointment-service" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   			
+   			<xsd:complexType name="Appointments">
+            	<xsd:sequence>
+              	 	<xsd:element minOccurs="0" maxOccurs="unbounded" name="Appointment" nillable="true" type="ms:Appointment" />
+           	 	</xsd:sequence>
+       		</xsd:complexType>
+    		
+    		<xsd:complexType name="Appointment">
+                <xsd:all>
+                	<xsd:element name="id"  type="xsd:string" />
+					<xsd:element name="startTime"  type="xsd:dateTime" />
+					<xsd:element name="endTime"  type="xsd:dateTime" />
+					<xsd:element name="description" type="xsd:string" />
+					<xsd:element name="durationMinutes" type="xsd:nonNegativeInteger" />
+					<xsd:element name="patientReference" type="xsd:string" />
+					<xsd:element name="patientName" type="xsd:string" />
+					<xsd:element name="practitionerReference" type="xsd:string" />
+					<xsd:element name="practitionerName" type="xsd:string" />
+					<xsd:element name="status" type="xsd:string" />
+					<xsd:element name="slotReference" type="xsd:string" />
+               </xsd:all>
+            </xsd:complexType>
+            
+    
+            <xsd:element name="CreateAppointment" type="ms:Appointment" />
+            <xsd:element name="CreateAppointmentResponse">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="id" type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+            
+            
+            <xsd:element name="GetAppointment">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="id"  type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+             <xsd:element name="GetAppointmentResponse">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="Appointment" type="ms:Appointment" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+            
+            
+            <xsd:element name="GetAppointments">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="patientID"  type="xsd:string" />
+                        <xsd:element name="practitionerID"  type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="GetAppointmentsResponse" type="ms:Appointments" />
+            
+            
+            <xsd:element name="UpdateAppointment" type="ms:Appointment" />
+            <xsd:element name="UpdateAppointmentResponse">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="status" type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="AppointmentFault">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="errorCode" type="xsd:string" />
+                        <xsd:element name="errorMessage" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+        </xsd:schema>
+    </wsdl:types>
+
+    <wsdl:message name="CreateAppointment">
+        <wsdl:part name="body" element="ms:CreateAppointment" />
+    </wsdl:message>
+
+    <wsdl:message name="CreateAppointmentResponse">
+        <wsdl:part name="body" element="ms:CreateAppointmentResponse" />
+    </wsdl:message>
+    
+    
+    <wsdl:message name="GetAppointment">
+        <wsdl:part name="body" element="ms:GetAppointment" />
+    </wsdl:message>
+
+    <wsdl:message name="GetAppointmentResponse">
+        <wsdl:part name="body" element="ms:GetAppointmentResponse" />
+    </wsdl:message>
+    
+    
+    <wsdl:message name="GetAppointments">
+    	<wsdl:part name="body" element="ms:GetAppointments" />
+    </wsdl:message>
+
+    <wsdl:message name="GetAppointmentsResponse">
+        <wsdl:part name="body" element="ms:GetAppointmentsResponse" />
+    </wsdl:message>
+    
+    
+    <wsdl:message name="UpdateAppointment">
+    	<wsdl:part name="body" element="ms:UpdateAppointment" />
+    </wsdl:message>
+
+    <wsdl:message name="UpdateAppointmentResponse">
+        <wsdl:part name="body" element="ms:UpdateAppointmentResponse" />
+    </wsdl:message>
+    
+    
+    
+    <wsdl:message name="AppointmentFault">
+        <wsdl:part name="fault" element="ms:AppointmentFault" />
+    </wsdl:message>
+
+    <!-- wsdl:portType describes messages in an operation -->
+    <wsdl:portType name="AppointmentServicePortType">
+
+        <wsdl:operation name="CreateAppointment">
+            <wsdl:input message="ms:CreateAppointment" />
+            <wsdl:output message="ms:CreateAppointmentResponse" />
+            <wsdl:fault name="AppointmentFault" message="ms:AppointmentFault" />
+        </wsdl:operation>
+        
+        <wsdl:operation name="GetAppointment">
+            <wsdl:input message="ms:GetAppointment" />
+            <wsdl:output message="ms:GetAppointmentResponse" />
+            <wsdl:fault name="AppointmentFault" message="ms:AppointmentFault" />
+        </wsdl:operation>
+        
+        <wsdl:operation name="GetAppointments">
+            <wsdl:input message="ms:GetAppointments" />
+            <wsdl:output message="ms:GetAppointmentsResponse" />
+            <wsdl:fault name="AppointmentFault" message="ms:AppointmentFault" />
+        </wsdl:operation>
+        
+        <wsdl:operation name="UpdateAppointment">
+            <wsdl:input message="ms:UpdateAppointment" />
+            <wsdl:output message="ms:UpdateAppointmentResponse" />
+            <wsdl:fault name="AppointmentFault" message="ms:AppointmentFault" />
+        </wsdl:operation>
+        
+          
+    </wsdl:portType>
+
+    <wsdl:binding name="AppointmentServiceSoapBinding" type="ms:AppointmentServicePortType">
+
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+
+        <wsdl:operation name="CreateAppointment">
+
+            <soap:operation soapAction="http://example.com/appointment-service/create-appointment" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/appointment-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/appointment-service" />
+            </wsdl:output>
+            <wsdl:fault name="AppointmentFault">
+                <soap:body use="literal" namespace="http://example.com/appointment-service" />
+            </wsdl:fault>
+            
+        </wsdl:operation>
+        
+        <wsdl:operation name="GetAppointment">
+
+            <soap:operation soapAction="http://example.com/appointment-service/get-appointment" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/appointment-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/appointment-service" />
+            </wsdl:output>
+            <wsdl:fault name="AppointmentFault">
+                <soap:body use="literal" namespace="http://example.com/appointment-service" />
+            </wsdl:fault>
+        </wsdl:operation>
+        
+        
+        <wsdl:operation name="GetAppointments">
+
+            <soap:operation soapAction="http://example.com/appointment-service/get-appointments" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/appointment-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/appointment-service" />
+            </wsdl:output>
+            <wsdl:fault name="AppointmentFault">
+                <soap:body use="literal" namespace="http://example.com/appointment-service" />
+            </wsdl:fault>
+        </wsdl:operation>
+        
+        
+        <wsdl:operation name="UpdateAppointment">
+
+            <soap:operation soapAction="http://example.com/appointment-service/update-appointment" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/appointment-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/appointment-service" />
+            </wsdl:output>
+            <wsdl:fault name="AppointmentFault">
+                <soap:body use="literal" namespace="http://example.com/appointment-service" />
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="AppointmentService">
+        <wsdl:documentation></wsdl:documentation>
+
+        <!-- connect it to the binding "EndorsementSearchSoapBinding" above -->
+        <wsdl:port name="AppointmentServicePort" binding="ms:AppointmentServiceSoapBinding">
+
+            <!-- give the binding an network address -->
+            <soap:address location="http://appointmentservice.getsandbox.com/appointmentService" />
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>

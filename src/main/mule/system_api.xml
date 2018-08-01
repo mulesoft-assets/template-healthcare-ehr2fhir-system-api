@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+	<flow name="healthcare_ehr2fhir_system_api-main">
+		<http:listener config-ref="healthcare_ehr2fhir_system_api-httpListenerConfig"
+			path="/api/*">
+			<http:response statusCode="#[vars.httpStatus default 200]">
+				<http:headers>#[vars.outboundHeaders default {}]</http:headers>
+			</http:response>
+			<http:error-response statusCode="#[vars.httpStatus default 500]">
+				<http:body>#[payload]</http:body>
+				<http:headers>#[vars.outboundHeaders default {}]</http:headers>
+			</http:error-response>
+		</http:listener>
+		<apikit:router config-ref="healthcare_ehr2fhir_system_api-config" />
+		<error-handler>
+			<on-error-propagate type="APIKIT:BAD_REQUEST">
+				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus">400
+						</ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate type="APIKIT:NOT_FOUND">
+				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus">404
+						</ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus">405
+						</ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus">406
+						</ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus">415
+						</ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus">501
+						</ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="healthcare_ehr2fhir_system_api-console">
+		<http:listener config-ref="healthcare_ehr2fhir_system_api-httpListenerConfig"
+			path="/console/*">
+			<http:response statusCode="#[vars.httpStatus default 200]">
+				<http:headers>#[vars.outboundHeaders default {}]</http:headers>
+			</http:response>
+			<http:error-response statusCode="#[vars.httpStatus default 500]">
+				<http:body>#[payload]</http:body>
+				<http:headers>#[vars.outboundHeaders default {}]</http:headers>
+			</http:error-response>
+		</http:listener>
+		<apikit:console config-ref="healthcare_ehr2fhir_system_api-config" />
+		<error-handler>
+			<on-error-propagate type="APIKIT:NOT_FOUND">
+				<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+					xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus">404
+						</ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+
+	<flow
+		name="put:\AllergyIntolerance\(id):healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="updateAllergyIntolerance" doc:id="d92fb69a-b34a-4e9c-9b59-5455cb4f4a79"
+			name="updateAllergyIntolerance" />
+
+	</flow>
+	<flow name="put:\Slot\(id):healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="updateSlot" doc:id="2c0fa481-0787-43eb-a683-5c9912ccc2e2"
+			name="updateSlot" />
+	</flow>
+	<flow name="put:\Practitioner\(id):healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="updatePractitioner" doc:id="00ac7151-f517-41cc-ad38-b89130128b62"
+			name="updatePractitioner" />
+	</flow>
+	<flow name="put:\Condition\(id):healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="updateCondition" doc:id="4ca79bfe-7488-4a7c-b8e8-e81089677cb9"
+			name="updateCondition" />
+	</flow>
+	<flow name="put:\Patient\(id):healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="updatePatient" doc:id="523f6570-f549-4701-b043-50a39657f519"
+			name="updatePatient" />
+	</flow>
+	<flow name="get:\AllergyIntolerance:healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="getAllergyIntolerances" doc:id="229b27b7-8f09-4619-a01b-46bb20ceafa4"
+			name="getAllergyIntolerances" />
+	</flow>
+	<flow
+		name="get:\Patient\(id)\AllergyIntolerance:healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="getPatientAllergyIntolerances" doc:id="a6feaf48-8f1f-4680-802b-50e0e69981e6"
+			name="getPatientAllergyIntolerances" />
+	</flow>
+	<flow
+		name="get:\Practitioner\(id)\Appointment:healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="getPractitionerAppointment" doc:id="89a459c8-3aa3-40ce-bba4-4bb1209f552f"
+			name="getPractitionerAppointment" />
+	</flow>
+	<flow name="get:\Appointment:healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="getAppointments" doc:id="3d8ee677-98f5-4ce7-a1eb-1c181a357594"
+			name="getAppointments" />
+	</flow>
+	<flow
+		name="get:\Patient\(id)\Appointment:healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="getPatientAppointments" doc:id="83f455c5-c900-4e92-a698-c0ae48a3e72c"
+			name="getPatientAppointments" />
+	</flow>
+	<flow name="get:\Condition:healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="getConditions" doc:id="596f0ee6-7d65-4007-9c2b-e37ed2e98521"
+			name="getConditions" />
+	</flow>
+	<flow
+		name="get:\Patient\(id)\Condition:healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="getPatientConditions" doc:id="643c649f-7d71-4568-8093-84247be549c8"
+			name="getPatientConditions" />
+	</flow>
+	<flow name="get:\Patient:healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="getPatients" doc:id="bef43578-e4e3-4612-aeae-3f4a1fa8651e"
+			name="getPatients" />
+	</flow>
+	<flow name="get:\Practitioner:healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="getPractitioners" doc:id="14878ddc-5cf2-4dd9-ae44-cb88ce8b4e3e"
+			name="getPractitioners" />
+	</flow>
+	<flow
+		name="get:\Practitioner\(id)\Schedule:healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="getPractitionerSchedule" doc:id="ccbb97d0-157d-4345-9f14-4d80aa0084f3"
+			name="getPractitionerSchedule" />
+	</flow>
+	<flow name="get:\Schedule:healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="getSchedules" doc:id="9508e533-4f20-4982-916b-447432a8f1f7"
+			name="getSchedules" />
+	</flow>
+	<flow name="get:\Slot:healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="getSlots" doc:id="1c006d96-c969-4f0b-9984-f862c8a98b38"
+			name="getSlots" />
+	</flow>
+	<flow name="get:\Patient\(id):healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="getPatient" doc:id="370c48cd-9aba-44f3-8b74-6efe96d3aa09"
+			name="getPatient" />
+	</flow>
+	<flow name="get:\Slot\(id):healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="getSlot" doc:id="690a372c-4de5-4247-ab0d-30c74945ba25"
+			name="getSlot" />
+
+	</flow>
+	<flow name="get:\Practitioner\(id):healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="getPractitioner" doc:id="e7259607-57e9-43dc-9897-b86bdc3de2c3"
+			name="getPractitioner" />
+	</flow>
+	<flow name="post:\AllergyIntolerance:healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="createAllergyIntolerance" doc:id="5453c594-745e-4364-9bdf-1a5c04092696"
+			name="createAllergyIntolerance" />
+	</flow>
+	<flow name="post:\Appointment:healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="createAppointment" doc:id="186fa513-8492-4c91-9a48-b21ab532eebc"
+			name="createAppointment" />
+	</flow>
+	<flow name="post:\Condition:healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="createCondition" doc:id="9f02d99e-e5f3-441a-a245-cb8b3f12a763"
+			name="createCondition" />
+	</flow>
+	<flow name="post:\Patient:healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="createPatient" doc:id="96adf50a-85d0-4c5c-9708-e42607121856"
+			name="createPatient" />
+	</flow>
+	<flow name="post:\Practitioner:healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="createPractitioner" doc:id="e855af79-65a4-4878-8a8d-7a02d1c4fb0c"
+			name="createPractitioner" />
+	</flow>
+	<flow name="post:\Schedule:healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="createSchedule" doc:id="03114552-a177-4567-a4d8-5d8ba0fe1c84"
+			name="createSchedule" />
+	</flow>
+	<flow name="post:\Slot:healthcare_ehr2fhir_system_api-config">
+		<flow-ref doc:name="createSlot" doc:id="23796e40-3b9d-432f-a382-28c0f79ae77e"
+			name="createSlot" />
+	</flow>
+</mule>
