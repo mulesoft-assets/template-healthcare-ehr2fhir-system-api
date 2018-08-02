@@ -1,0 +1,239 @@
+<?xml version="1.0"?>
+
+<wsdl:definitions name="AllergyIntoleranceService" targetNamespace="http://example.com/allergy-service"
+    xmlns:ms="http://example.com/allergy-service" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+
+    <wsdl:types>
+
+        <xsd:schema targetNamespace="http://example.com/allergy-service" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+   			
+   			<xsd:complexType name="AllergyIntolerances">
+            	<xsd:sequence>
+              	 	<xsd:element minOccurs="0" maxOccurs="unbounded" name="AllergyIntolerance" nillable="true" type="ms:AllergyIntolerance" />
+           	 	</xsd:sequence>
+       		</xsd:complexType>
+    		
+    		<xsd:complexType name="AllergyIntolerance">
+                <xsd:all>
+                	<xsd:element name="id"  type="xsd:string" />
+                	<xsd:element name="recordedDate"  type="xsd:string" />
+	                <xsd:element name="patientReference"  type="xsd:string" />
+	                <xsd:element name="reporterReference" type="xsd:string" />
+	                <xsd:element name="substanceCode" type="xsd:string" />
+	                <xsd:element name="substanceText" type="xsd:string" />
+	                <xsd:element name="criticality" type="xsd:string" />
+	                <xsd:element name="type" type="xsd:string" />
+	                <xsd:element name="status" type="xsd:string" />
+               </xsd:all>
+            </xsd:complexType>
+            
+    
+            <xsd:element name="CreateAllergyIntolerance" type="ms:AllergyIntolerance" />
+            <xsd:element name="CreateAllergyIntoleranceResponse">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="id" type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+            
+            
+            <xsd:element name="GetAllergyIntolerance">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="id"  type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+             <xsd:element name="GetAllergyIntoleranceResponse">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="AllergyIntolerance" type="ms:AllergyIntolerance" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+            
+            
+            <xsd:element name="GetAllergyIntolerances">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="patientID"  type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="GetAllergyIntolerancesResponse" type="ms:AllergyIntolerances" />
+            
+            
+            <xsd:element name="UpdateAllergyIntolerance" type="ms:AllergyIntolerance" />
+            <xsd:element name="UpdateAllergyIntoleranceResponse">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="status" type="xsd:string" />
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+            
+            <xsd:element name="AllergyIntoleranceFault">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="errorCode" type="xsd:string" />
+                        <xsd:element name="errorMessage" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+        </xsd:schema>
+    </wsdl:types>
+
+    <wsdl:message name="CreateAllergyIntolerance">
+        <wsdl:part name="body" element="ms:CreateAllergyIntolerance" />
+    </wsdl:message>
+
+    <wsdl:message name="CreateAllergyIntoleranceResponse">
+        <wsdl:part name="body" element="ms:CreateAllergyIntoleranceResponse" />
+    </wsdl:message>
+    
+    
+    <wsdl:message name="GetAllergyIntolerance">
+        <wsdl:part name="body" element="ms:GetAllergyIntolerance" />
+    </wsdl:message>
+
+    <wsdl:message name="GetAllergyIntoleranceResponse">
+        <wsdl:part name="body" element="ms:GetAllergyIntoleranceResponse" />
+    </wsdl:message>
+    
+    
+    <wsdl:message name="GetAllergyIntolerances">
+    	<wsdl:part name="body" element="ms:GetAllergyIntolerances" />
+    </wsdl:message>
+
+    <wsdl:message name="GetAllergyIntolerancesResponse">
+        <wsdl:part name="body" element="ms:GetAllergyIntolerancesResponse" />
+    </wsdl:message>
+    
+    
+    <wsdl:message name="UpdateAllergyIntolerance">
+    	<wsdl:part name="body" element="ms:UpdateAllergyIntolerance" />
+    </wsdl:message>
+
+    <wsdl:message name="UpdateAllergyIntoleranceResponse">
+        <wsdl:part name="body" element="ms:UpdateAllergyIntoleranceResponse" />
+    </wsdl:message>
+    
+    
+    
+    <wsdl:message name="AllergyIntoleranceFault">
+        <wsdl:part name="fault" element="ms:AllergyIntoleranceFault" />
+    </wsdl:message>
+
+    <!-- wsdl:portType describes messages in an operation -->
+    <wsdl:portType name="AllergyServicePortType">
+
+        <wsdl:operation name="CreateAllergyIntolerance">
+            <wsdl:input message="ms:CreateAllergyIntolerance" />
+            <wsdl:output message="ms:CreateAllergyIntoleranceResponse" />
+            <wsdl:fault name="AllergyIntoleranceFault" message="ms:AllergyIntoleranceFault" />
+        </wsdl:operation>
+        
+        <wsdl:operation name="GetAllergyIntolerance">
+            <wsdl:input message="ms:GetAllergyIntolerance" />
+            <wsdl:output message="ms:GetAllergyIntoleranceResponse" />
+            <wsdl:fault name="AllergyIntoleranceFault" message="ms:AllergyIntoleranceFault" />
+        </wsdl:operation>
+        
+        <wsdl:operation name="GetAllergyIntolerances">
+            <wsdl:input message="ms:GetAllergyIntolerances" />
+            <wsdl:output message="ms:GetAllergyIntolerancesResponse" />
+            <wsdl:fault name="AllergyIntoleranceFault" message="ms:AllergyIntoleranceFault" />
+        </wsdl:operation>
+        
+        <wsdl:operation name="UpdateAllergyIntolerance">
+            <wsdl:input message="ms:UpdateAllergyIntolerance" />
+            <wsdl:output message="ms:UpdateAllergyIntoleranceResponse" />
+            <wsdl:fault name="AllergyIntoleranceFault" message="ms:AllergyIntoleranceFault" />
+        </wsdl:operation>
+        
+          
+    </wsdl:portType>
+
+    <wsdl:binding name="AllergyServiceSoapBinding" type="ms:AllergyServicePortType">
+
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+
+        <wsdl:operation name="CreateAllergyIntolerance">
+
+            <soap:operation soapAction="http://example.com/allergy-service/create-allergyIntolerance" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
+            </wsdl:output>
+            <wsdl:fault name="AllergyIntoleranceFault">
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
+            </wsdl:fault>
+            
+        </wsdl:operation>
+        
+        <wsdl:operation name="GetAllergyIntolerance">
+
+            <soap:operation soapAction="http://example.com/allergy-service/get-allergyIntolerance" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
+            </wsdl:output>
+            <wsdl:fault name="AllergyIntoleranceFault">
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
+            </wsdl:fault>
+        </wsdl:operation>
+        
+        
+        <wsdl:operation name="GetAllergyIntolerances">
+
+            <soap:operation soapAction="http://example.com/allergy-service/get-allergyIntolerances" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
+            </wsdl:output>
+            <wsdl:fault name="AllergyIntoleranceFault">
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
+            </wsdl:fault>
+        </wsdl:operation>
+        
+        
+        <wsdl:operation name="UpdateAllergyIntolerance">
+
+            <soap:operation soapAction="http://example.com/allergy-service/update-allergyIntolerance" />
+
+            <wsdl:input>
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
+            </wsdl:output>
+            <wsdl:fault name="AllergyIntoleranceFault">
+                <soap:body use="literal" namespace="http://example.com/allergy-service" />
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="AllergyService">
+        <wsdl:documentation></wsdl:documentation>
+
+        <!-- connect it to the binding "EndorsementSearchSoapBinding" above -->
+        <wsdl:port name="AllergyServicePort" binding="ms:AllergyServiceSoapBinding">
+
+            <!-- give the binding an network address -->
+            <soap:address location="http://allergyservice.getsandbox.com/allergyService" />
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>

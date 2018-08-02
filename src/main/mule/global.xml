@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd">
+	<http:listener-config
+		name="healthcare_ehr2fhir_system_api-httpListenerConfig">
+		<http:listener-connection host="0.0.0.0"
+			port="${http.port}" />
+	</http:listener-config>
+	<apikit:config name="healthcare_ehr2fhir_system_api-config"
+		raml="healthcare_ehr2fhir_system_api.raml" outboundHeadersMapName="outboundHeaders"
+		httpStatusVarName="httpStatus" />
+	<wsc:config name="AllergyIntolerance" doc:name="Web Service Consumer Config"
+		doc:id="cd9b6548-7928-420d-be9a-b80d51693dd2">
+		<wsc:connection wsdlLocation="wsdl/AllergyIntoleranceService.wsdl"
+			service="${allergyintolerance.service}" port="${allergyintolerance.port}"
+			address="${allergyintolerance.address}" />
+	</wsc:config>
+	<wsc:config name="Appointment" doc:name="Web Service Consumer Config"
+		doc:id="bcb5da12-70b9-490f-ba0a-6e00c90ed7f7">
+		<wsc:connection wsdlLocation="wsdl/AppointmentService.wsdl"
+			service="${appointment.service}" port="${appointment.port}" address="${appointment.address}" />
+	</wsc:config>
+	<wsc:config name="Condition" doc:name="Web Service Consumer Config"
+		doc:id="932be216-b659-42eb-a600-fc05feeb5675">
+		<wsc:connection wsdlLocation="wsdl/ConditionService.wsdl"
+			service="${condition.service}" port="${condition.port}" address="${condition.address}" />
+	</wsc:config>
+	<wsc:config name="Patient" doc:name="Web Service Consumer Config"
+		doc:id="1612adb8-ad73-4b97-bf3e-48770bd1a9b1">
+		<wsc:connection wsdlLocation="wsdl/PatientService.wsdl"
+			service="${patient.service}" port="${patient.port}" address="${patient.address}" />
+	</wsc:config>
+	<wsc:config name="Practitioner" doc:name="Web Service Consumer Config"
+		doc:id="0c6003cf-35d2-4b54-8b7c-0585fe33e6de">
+		<wsc:connection wsdlLocation="wsdl/PractitionerService.wsdl"
+			service="${practitioner.service}" port="${practitioner.port}"
+			address="${practitioner.address}" />
+	</wsc:config>
+	<wsc:config name="Schedule" doc:name="Web Service Consumer Config"
+		doc:id="b064a32b-d6dd-46d1-ac63-0a5a46cb7b2b">
+		<wsc:connection wsdlLocation="wsdl/ScheduleService.wsdl"
+			service="${schedule.service}" port="${schedule.port}" address="${schedule.address}" />
+	</wsc:config>
+	<wsc:config name="Slot" doc:name="Web Service Consumer Config"
+		doc:id="4cffbccc-cc84-45cb-aac0-8390adf1ba6c">
+		<wsc:connection wsdlLocation="wsdl/SlotService.wsdl"
+			service="${slot.service}" port="${slot.port}" address="${slot.address}" />
+	</wsc:config>
+	<configuration-properties doc:name="Configuration properties"
+		doc:id="f9696df3-b22f-4a1a-a917-f83fcb3c2479" file="common.properties" />
+	<configuration-properties doc:name="Configuration properties"
+		doc:id="e84f05a7-4b38-4f7a-8d5b-6c61699251b1" file="mule-artifact.properties" />
+	<configuration-properties doc:name="Configuration properties"
+		doc:id="0079c62c-cf76-4e7a-884f-c1a313f08ba9" file="mule.${mule.env}.properties" />
+</mule>
