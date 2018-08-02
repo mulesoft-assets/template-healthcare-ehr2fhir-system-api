@@ -67,8 +67,6 @@ Anypoint Studio offers several ways to import a project into the workspace, for 
 + Anypoint Studio Project from File System
 + Packaged mule application (.jar)
 
-You can find a detailed description on how to do so in this [Documentation Page](https://docs.mulesoft.com/anypoint-studio/v/6/importing-and-exporting-in-studio).
-
 ### Running on Studio <a name="runonstudio"/>
 Once you have imported you Anypoint Template into Anypoint Studio you need to follow these steps to run it:
 
@@ -86,10 +84,10 @@ While [creating your application on CloudHub](https://docs.mulesoft.com/runtime-
 Follow other steps defined [here](#runonpremise) and once your app is all set and started, there is no need to do anything else.
 
 ### Deploying your Anypoint Template on CloudHub <a name="deployingyouranypointtemplateoncloudhub"/>
-Anypoint Studio provides you with really easy way to deploy your Template directly to CloudHub, for the specific steps to do so please check this [link](https://docs.mulesoft.com/mule-fundamentals/v/3.8/deploying-mule-applications#deploy-to-the-anypoint-platform)
+Anypoint Studio provides you with really easy way to deploy your Template directly to CloudHub, for the specific steps to do so please check this [link](https://docs.mulesoft.com/anypoint-studio/v/7.1/deploy-mule-application-task#deploy-to-the-anypoint-platform)
 
 ## Properties to be configured (With examples) <a name="propertiestobeconfigured"/>
-In order to use this Mule Anypoint Template you need to configure properties (APIs, Credentials, API Autodiscovery, etc.) either in properties file or in CloudHub as Environment Variables. The Fitbit System API is using secured connection. Detail list with examples:
+In order to use this Mule Anypoint Template you need to configure properties (APIs, Credentials, API Autodiscovery, etc.) either in properties file or in CloudHub as Environment Variables. Detail list with examples:
 ### Application properties
 
 + http.port `8081`
