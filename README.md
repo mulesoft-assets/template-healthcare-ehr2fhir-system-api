@@ -23,7 +23,7 @@ Please review the terms of the license before downloading and using this templat
 As a user of Healthcare API Led Connectivity Web Portal I want a microservice to act as a system API to provide services to upper layers of the architecture. 
 This include creation, modification and retrieval of medical data from an EHR system.
 
-EHR System API is part of the Healthcare Templates Solution and uses the standardized FHIR structures [version 1.0.2 DSTU2](https://www.hl7.org/FHIR/DSTU2/index.html).
+EHR System API is part of the Healthcare Templates Solution and uses the standardized FHIR structures [version 3.0.1 STU3](https://www.hl7.org/FHIR/index.html).
 
 The API is defined using [RAML 1.0](http://raml.org/) to provide type information for validation of requests and to help with the data transformation during development by providing useful metadata.
 
