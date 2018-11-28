@@ -57,7 +57,6 @@ http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/
 	<configuration-properties doc:name="Configuration properties"
 		doc:id="f9696df3-b22f-4a1a-a917-f83fcb3c2479" file="common.properties" />
 	<configuration-properties doc:name="Configuration properties"
-		doc:id="e84f05a7-4b38-4f7a-8d5b-6c61699251b1" file="mule-artifact.properties" />
-	<configuration-properties doc:name="Configuration properties"
 		doc:id="0079c62c-cf76-4e7a-884f-c1a313f08ba9" file="mule.${mule.env}.properties" />
+	<global-property doc:name="Global Property" doc:id="57065ee4-9897-4171-91ee-455435437505" name="mule.env" value="dev" />
 </mule>
