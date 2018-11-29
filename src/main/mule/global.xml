@@ -9,6 +9,8 @@
 http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd">
+	
+	<global-property doc:name="Global Property" doc:id="078acc4b-f917-4fd8-910e-549e35cba2f5" name="mule.env" value="dev" />
 	<http:listener-config
 		name="healthcare_ehr2fhir_system_api-httpListenerConfig">
 		<http:listener-connection host="0.0.0.0"
@@ -56,8 +58,6 @@ http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/
 	</wsc:config>
 	<configuration-properties doc:name="Configuration properties"
 		doc:id="f9696df3-b22f-4a1a-a917-f83fcb3c2479" file="common.properties" />
-	<configuration-properties doc:name="Configuration properties"
-		doc:id="e84f05a7-4b38-4f7a-8d5b-6c61699251b1" file="mule-artifact.properties" />
 	<configuration-properties doc:name="Configuration properties"
 		doc:id="0079c62c-cf76-4e7a-884f-c1a313f08ba9" file="mule.${mule.env}.properties" />
 </mule>
