@@ -1,7 +1,7 @@
 #%RAML 1.0 Library
 
 uses:
-  FHIR_commons: /exchange_modules/a06c5779-bccc-4b0e-b90b-96933206e3c1/fhir_commons/1.0.0/fhir_commons.raml
+  FHIR_commons: /exchange_modules/org.mule.templates/fhir-commons/1.0.0/fhir_commons.raml
 
 types:
   Entry:
@@ -44,34 +44,34 @@ types:
   AllergyIntoleranceEntry:
     type: Entry
     properties:
-      resource?: !include /exchange_modules/a06c5779-bccc-4b0e-b90b-96933206e3c1/allergyintolerance/1.0.0/allergyintolerance.raml
+      resource?: !include /exchange_modules/org.mule.templates/allergy-intolerance/1.0.0/allergyintolerance.raml
 
   AppointmentEntry:
     type: Entry
     properties:
-      resource?: !include /exchange_modules/a06c5779-bccc-4b0e-b90b-96933206e3c1/appointment/1.0.0/appointment.raml
+      resource?: !include /exchange_modules/org.mule.templates/appointment/1.0.0/appointment.raml
 
   ConditionEntry:
     type: Entry
     properties:
-      resource?: !include /exchange_modules/a06c5779-bccc-4b0e-b90b-96933206e3c1/condition/1.0.0/condition.raml
+      resource?: !include /exchange_modules/org.mule.templates/condition/1.0.0/condition.raml
 
   PatientEntry:
     type: Entry
     properties:
-      resource?: !include /exchange_modules/a06c5779-bccc-4b0e-b90b-96933206e3c1/patient/1.0.0/patient.raml
+      resource?: !include /exchange_modules/org.mule.templates/patient/1.0.0/patient.raml
 
   PractitionerEntry:
     type: Entry
     properties:
-      resource?: !include /exchange_modules/a06c5779-bccc-4b0e-b90b-96933206e3c1/practitioner/1.0.0/practitioner.raml
+      resource?: !include /exchange_modules/org.mule.templates/practitioner/1.0.0/practitioner.raml
 
   ScheduleEntry:
     type: Entry
     properties:
-      resource?: !include /exchange_modules/a06c5779-bccc-4b0e-b90b-96933206e3c1/schedule/1.0.0/schedule.raml
+      resource?: !include /exchange_modules/org.mule.templates/schedule/1.0.0/schedule.raml
 
   SlotEntry:
     type: Entry
     properties:
-      resource?: !include /exchange_modules/a06c5779-bccc-4b0e-b90b-96933206e3c1/slot/1.0.0/slot.raml
+      resource?: !include /exchange_modules/org.mule.templates/slot/1.0.0/slot.raml
