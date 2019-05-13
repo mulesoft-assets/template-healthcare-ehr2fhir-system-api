@@ -6,7 +6,7 @@ Underlying all IT architectures are core systems of records that are often not r
 
 ## Healthcare Accelerator
 
-This EHR Implementation is one of many components included in [Catalyst Accelerator for Healthcare](/exchange/68ef9520-24e9-4cf2-b2f5-620025690913/catalyst-accelerator-for-healthcare/). It provides organizations with connectivity assets that accelerate project delivery in healthcare, including pre-built API designs and implementations that support core healthcare business processes. Contact [info@mulesoft.com](mailto:info@mulesoft.com) for more information.
+This EHR Implementation is one of many components included in [Accelerator for Healthcare](/exchange/68ef9520-24e9-4cf2-b2f5-620025690913/catalyst-accelerator-for-healthcare/). This API provides organizations with connectivity assets that accelerate project delivery in healthcare, including pre-built API designs and implementations that support core healthcare business processes. Contact [info@mulesoft.com](mailto:info@mulesoft.com) for more information.
 
 # License Agreement
 
@@ -14,12 +14,11 @@ This template is subject to the conditions of the <a href="https://s3.amazonaws.
 
 # Use Case
 
-As a user of Healthcare API Led Connectivity Web Portal I want a microservice to act as a system API to provide services to upper layers of the architecture. This include creation, modification, and retrieval of medical data from an EHR system.
+As a user of Healthcare API-led connectivity web portal, I want a microservice to act as a system API to provide services to upper layers of the architecture. This includes creation, modification, and retrieval of medical data from an EHR system.
 
 EHR System API is part of the Healthcare Templates Solution and uses the standardized FHIR structures [version 3.0.1 STU3](https://www.hl7.org/FHIR/index.html).
 
 The API is defined using [RAML 1.0](http://raml.org/) to provide type information for validation of requests and to help with the data transformation during development by providing useful metadata.
-
 
 The following FHIR objects and operations are implemented in this API:
 
